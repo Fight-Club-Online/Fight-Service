@@ -1,5 +1,6 @@
-package Fight_club.Fight_Services.Application.Ports.Output;
+package Fight_club.Fight_Services.Infrastructure.Outbound.DataBase.InMemory;
 
+import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
 import org.springframework.stereotype.Repository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import java.util.Map;

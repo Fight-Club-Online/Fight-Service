@@ -18,5 +18,5 @@ public class RoomInitializedEvent {
     private int currentPlayers;
     private int maxSpectators;
     private int currentSpectators;
-    private List<PlayerEventDTO> players ;
+    private List<RoomPlayerEvent> players ;
 }

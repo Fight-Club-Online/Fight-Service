@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Infrastructure.Inbound;
+package Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event;
 
 import java.time.Instant;
 
