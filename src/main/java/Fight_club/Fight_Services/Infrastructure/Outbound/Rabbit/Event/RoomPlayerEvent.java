@@ -6,7 +6,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class PlayerEventDTO {
+public class RoomPlayerEvent {
     private String userId;
     private String roomCode;
     private PlayerType playerType;

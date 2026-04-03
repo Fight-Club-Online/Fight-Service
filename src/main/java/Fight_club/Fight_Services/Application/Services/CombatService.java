@@ -1,5 +1,6 @@
 package Fight_club.Fight_Services.Application.Services;
 
+import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import org.springframework.stereotype.Service;
 import Fight_club.Fight_Services.Application.Ports.Input.ProcessCombatInputUseCase;
 import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class CombatService implements ProcessCombatInputUseCase {
 
     private final CombatRepository combatRepository;
+    private final FightWsBroker fightWsBroker;
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
@@ -38,6 +40,8 @@ public class CombatService implements ProcessCombatInputUseCase {
         }
 
         combatRepository.save(fight);
+        Fight fightUpdated = combatRepository.findById(fightId).orElseThrow();
+        fightWsBroker.fightStateUpdate(fightId, fightUpdated);
     }
 
     private boolean isAttackAction(FighterAction action) {
