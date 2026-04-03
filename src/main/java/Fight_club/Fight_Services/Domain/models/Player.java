@@ -1,6 +1,7 @@
-package Fight_club.Fight_Services.Domain.Model;
+package Fight_club.Fight_Services.Domain.models;
 
-import Fight_club.Fight_Services.Domain.Model.Enums.PlayerType;
+
+import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

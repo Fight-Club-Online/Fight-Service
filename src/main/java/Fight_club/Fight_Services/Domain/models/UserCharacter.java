@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Domain.Model;
+package Fight_club.Fight_Services.Domain.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,52 +1,85 @@
 package Fight_club.Fight_Services.Infrastructure.Config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.amqp.core.Queue;
-
 
 @Configuration
 public class RabbitConfig {
 
+    public static final String EXCHANGE_ROOM = "room.exchange";
+    public static final String ROOM_QUEUE = "room.queue";
+    public static final String ROUTING_KEY_ROOM = "room.initialized";
 
-    //Como Consumidor
+    public static final String EXCHANGE_USER = "user.events";
+    public static final String QUEUE_USER_REGISTERED = "fight.user.registered.queue";
+    public static final String ROUTING_KEY_USER_REG = "user.registered";
+    
+    public static final String QUEUE_GUEST_REGISTERED = "fight.guest.registered.queue";
+    public static final String ROUTING_KEY_GUEST = "user.guest.registered";
+    
+
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(new Jackson2JsonMessageConverter());
-        return template;
+    public Queue guestRegisteredQueue() {
+        return new Queue(QUEUE_GUEST_REGISTERED, true);
     }
 
-    public static final String EXCHANGE = "room.exchange"; // decide a quien enviar
-    public static final String ROOM_QUEUE = "room.queue"; // donde se recibe
-    public static final String ROUTING_KEY = "room.initialized"; // llave para recibir
-
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE);
+    public Binding bindingGuestRegistered(Queue guestRegisteredQueue, TopicExchange userExchange) {
+        return BindingBuilder
+                .bind(guestRegisteredQueue)
+                .to(userExchange)
+                .with(ROUTING_KEY_GUEST);
+    }
+    @Bean
+    public TopicExchange roomExchange() {
+        return new TopicExchange(EXCHANGE_ROOM);
     }
 
-
     @Bean
-    public Queue queue() {
+    public Queue roomQueue() {
         return new Queue(ROOM_QUEUE, false);
     }
 
     @Bean
-    public Binding bindingInitializedRoom(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.
-                bind(queue)
-                .to(exchange)
-                .with(ROUTING_KEY);
+    public Binding bindingInitializedRoom(Queue roomQueue, TopicExchange roomExchange) {
+        return BindingBuilder
+                .bind(roomQueue)
+                .to(roomExchange)
+                .with(ROUTING_KEY_ROOM);
     }
 
+    @Bean
+    public TopicExchange userExchange() {
+        return new TopicExchange(EXCHANGE_USER);
+    }
 
-    //Como Productor
+    @Bean
+    public Queue userRegisteredQueue() {
+        return new Queue(QUEUE_USER_REGISTERED, true); 
+    }
 
+    @Bean
+    public Binding bindingUserRegistered(Queue userRegisteredQueue, TopicExchange userExchange) {
+        return BindingBuilder
+                .bind(userRegisteredQueue)
+                .to(userExchange)
+                .with(ROUTING_KEY_USER_REG);
+    }
+
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(jsonMessageConverter());
+        return template;
+    }
 }
