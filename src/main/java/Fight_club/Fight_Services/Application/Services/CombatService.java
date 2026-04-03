@@ -10,38 +10,47 @@ import Fight_club.Fight_Services.Domain.models.Skill;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Service
 @RequiredArgsConstructor
 public class CombatService implements ProcessCombatInputUseCase {
 
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
+    private final Map<String,Object> fightLock = new ConcurrentHashMap<>();
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
-        Fight fight = combatRepository.findById(fightId)
-                .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+        Object lock = fightLock.computeIfAbsent(fightId, k -> new Object());
 
-        Fighter attacker = fight.getFighterByUserId(userId);
-        Fighter defender = fight.getOpponentOf(userId);
+        synchronized (lock) {
+            Fight fight = combatRepository.findById(fightId)
+                    .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
-        attacker.executeAction(action);
+            Fighter attacker = fight.getFighterByUserId(userId);
+            Fighter defender = fight.getOpponentOf(userId);
 
-        if (isAttackAction(action)) {
-            Skill skillUsed = attacker.getSkillForAction(action);
-            
-            if (checkCollision(attacker, defender)) {
-                defender.receiveAttack(skillUsed);
-                
-                if (defender.isDefeated()) {
-                    handleMatchEnd(fightId, attacker.getUserId());
+            attacker.executeAction(action);
+
+            if (isAttackAction(action)) {
+                Skill skillUsed = attacker.getSkillForAction(action);
+
+                if (checkCollision(attacker, defender)) {
+                    defender.receiveAttack(skillUsed);
+
+                    if (defender.isDefeated()) {
+                        handleMatchEnd(fightId, attacker.getUserId());
+                    }
                 }
             }
+
+            combatRepository.save(fight);
+            Fight fightUpdated = combatRepository.findById(fightId).orElseThrow();
+            fightWsBroker.fightStateUpdate(fightId, fightUpdated);
         }
 
-        combatRepository.save(fight);
-        Fight fightUpdated = combatRepository.findById(fightId).orElseThrow();
-        fightWsBroker.fightStateUpdate(fightId, fightUpdated);
     }
 
     private boolean isAttackAction(FighterAction action) {
