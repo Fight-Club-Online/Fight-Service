@@ -14,7 +14,7 @@ import java.util.List;
 public class Fighter {
     
     private final String id;
-    private final String userId; 
+    private  String userId;
     
     private final long characterId;
     private final String characterName;
@@ -87,4 +87,6 @@ public class Fighter {
     public boolean isDefeated() {
         return !this.health.isAlive();
     }
+
+
 }
