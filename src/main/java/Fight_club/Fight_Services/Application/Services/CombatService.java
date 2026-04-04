@@ -1,6 +1,8 @@
 package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
+import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import org.springframework.stereotype.Service;
 import Fight_club.Fight_Services.Application.Ports.Input.ProcessCombatInputUseCase;
 import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
@@ -19,11 +21,11 @@ public class CombatService implements ProcessCombatInputUseCase {
 
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
-    private final Map<String,Object> fightLock = new ConcurrentHashMap<>();
+    private final FightLockManager lockManager;
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
-        Object lock = fightLock.computeIfAbsent(fightId, k -> new Object());
+        Object lock = lockManager.getLock(fightId);
 
         synchronized (lock) {
             Fight fight = combatRepository.findById(fightId)
@@ -43,15 +45,25 @@ public class CombatService implements ProcessCombatInputUseCase {
                     if (defender.isDefeated()) {
                         handleMatchEnd(fightId, attacker.getUserId());
                     }
+
+                   be.activate(fight.getHelpButton(),defender.getHealth().getCurrentHealth(),defender.getHealth().getMaxHealth(),defender.getUserId());
                 }
             }
 
             combatRepository.save(fight);
             Fight fightUpdated = combatRepository.findById(fightId).orElseThrow();
-            fightWsBroker.fightStateUpdate(fightId, fightUpdated);
+            fightWsBroker.fightStateUpdate(fightId, fightUpdated);  
         }
 
     }
+
+    ButtonEvent be = (btn, health, maxHe, userId) -> {
+        if (health <= maxHe * 3 / 4) {
+            btn.activate(userId);
+        }
+    };
+
+
 
     private boolean isAttackAction(FighterAction action) {
         return action == FighterAction.BASIC_ATTACK || action == FighterAction.SPECIAL_ATTACK;
