@@ -20,4 +20,13 @@ public class HelpButton {
         this.status = ButtonStatus.ACTIVE;
         this.activatedForUserId = userId;
     }
+
+    public void deactivate() {
+        this.status = ButtonStatus.INACTIVE;
+        this.activatedForUserId = "";
+        this.claimedByUserId = "";
+        this.type = null;
+        this.isVisible = false;
+
+    }
 }

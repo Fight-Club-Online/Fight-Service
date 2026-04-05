@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static Fight_club.Fight_Services.Domain.models.Enums.PlayerType.SPECTATOR;
+
 @Service
 @AllArgsConstructor
 public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
@@ -37,7 +39,7 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
                 helpButton.setType(ButtomClaimedType.SPECTATOR);
                 String userHelp = helpButton.getActivatedForUserId();
                 Fighter f = fight.getFighterByUserId(userHelp);
-                changePlayer(p,f);
+                fight.addSpectator(changePlayer(p,f));
             } else {
                 Fighter f = fight.getFighterByUserId(userId);
                 healOpponent(f);
@@ -55,10 +57,10 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
     }
 
 
-    private void changePlayer(Player player,Fighter fighter){
+    private Player changePlayer(Player player,Fighter fighter){
         fighter.setUserId(player.getUserId());
         player.setPlayerType(PlayerType.HELPER);
-
+        return new Player(fighter.getUserId(),SPECTATOR);
     }
 
     private void healOpponent(Fighter fighter){
