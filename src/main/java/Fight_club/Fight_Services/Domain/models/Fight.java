@@ -36,6 +36,13 @@ public class Fight {
         return spectators.stream().filter(s -> s.getUserId().equals(userId)).findFirst();
     }
 
+    public void addSpectator(Player player) {
+        spectators.add(player);
+    }
+
+    public void removeSpectator(Player player) {
+        spectators.remove(player);
+    }
     public void finishFight() {
         this.isActive = false;
     }

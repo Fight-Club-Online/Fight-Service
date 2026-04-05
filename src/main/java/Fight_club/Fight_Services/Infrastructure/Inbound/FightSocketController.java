@@ -33,4 +33,10 @@ public class FightSocketController {
     public void askHelpButton(@DestinationVariable String fightId, @Payload String userId) {
         askHelpButtonUseCase.askHelpButton(fightId,userId);
     }
+
+    @MessageMapping("/fight/{fightId}/takeBack")
+    public void takeBackFighter(@DestinationVariable String fightId, @Payload String userId) {
+
+    }
+
 }
