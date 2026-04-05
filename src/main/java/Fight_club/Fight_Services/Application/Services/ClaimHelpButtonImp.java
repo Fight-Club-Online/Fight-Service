@@ -7,10 +7,14 @@ import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
 import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
 import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocketUpdater;
 import lombok.AllArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
 import static Fight_club.Fight_Services.Domain.models.Enums.PlayerType.SPECTATOR;
 
 @Service
@@ -18,42 +22,53 @@ import static Fight_club.Fight_Services.Domain.models.Enums.PlayerType.SPECTATOR
 public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
     private final FightWebSocketUpdater fightWebSocketUpdater;
     private final CombatRepository combatRepository;
-    private final FightLockManager lockManager;
+    private final RedissonClient redisson;
+
+
 
 
     @Override
     public void claimHelpButton(String fightId, String userId) {
-        Object lock = lockManager.getLock(fightId);
-        synchronized (lock) {
-            Fight fight = combatRepository.findById(fightId)
-                    .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+        RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
-            HelpButton helpButton = fight.getHelpButton();
-            if (helpButton.getClaimedByUserId() != null) {
-                return;
+        try{
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                Fight fight = combatRepository.findById(fightId)
+                        .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+
+                HelpButton helpButton = fight.getHelpButton();
+                if (helpButton.getClaimedByUserId() != null) {
+                    return;
+                }
+                helpButton.setClaimedByUserId(userId);
+
+                if (fight.getSpectatorByUserId(userId).isPresent()) {
+                    Player p = fight.getSpectatorByUserId(userId).get();
+                    helpButton.setType(ButtomClaimedType.SPECTATOR);
+                    String userHelp = helpButton.getActivatedForUserId();
+                    Fighter f = fight.getFighterByUserId(userHelp);
+                    fight.addSpectator(changePlayer(p,f));
+                } else {
+                    Fighter f = fight.getFighterByUserId(userId);
+                    healOpponent(f);
+                    helpButton.setType(ButtomClaimedType.OPPONENT);
+                }
+                helpButton.setVisible(false);
+
+                combatRepository.save(fight);
+                fightWebSocketUpdater.changeFighters(fightId, fight);
             }
-            helpButton.setClaimedByUserId(userId);
 
-            if (fight.getSpectatorByUserId(userId).isPresent()) {
-                Player p = fight.getSpectatorByUserId(userId).get();
-                helpButton.setType(ButtomClaimedType.SPECTATOR);
-                String userHelp = helpButton.getActivatedForUserId();
-                Fighter f = fight.getFighterByUserId(userHelp);
-                fight.addSpectator(changePlayer(p,f));
-            } else {
-                Fighter f = fight.getFighterByUserId(userId);
-                healOpponent(f);
-                helpButton.setType(ButtomClaimedType.OPPONENT);
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to acquire lock for fight: " + fightId, e);
+
+        }finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
             }
-            helpButton.setVisible(false);
-
-
-
-            combatRepository.save(fight);
-            Fight fightUpdated = combatRepository.findById(fightId).orElseThrow();
-            fightWebSocketUpdater.changeFighters(fightId, fightUpdated);
-
         }
+
     }
 
 
