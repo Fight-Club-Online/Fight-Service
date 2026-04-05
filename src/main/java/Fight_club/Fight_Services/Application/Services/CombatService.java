@@ -2,20 +2,17 @@ package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
-import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import Fight_club.Fight_Services.Application.Ports.Input.ProcessCombatInputUseCase;
-import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fighter;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.Skill;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;

@@ -1,9 +1,8 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Redisson;
 
-import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import lombok.AllArgsConstructor;
-import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Repository;

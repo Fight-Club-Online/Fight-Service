@@ -1,8 +1,7 @@
 package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Input.TakeBackControlUseCase;
-import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
-import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.Fighter;
