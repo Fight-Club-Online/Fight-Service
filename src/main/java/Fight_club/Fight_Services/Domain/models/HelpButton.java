@@ -3,10 +3,12 @@ package Fight_club.Fight_Services.Domain.models;
 import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
 import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @AllArgsConstructor
 @Data
+@Builder
 public class HelpButton {
     private long buttonId;
     private boolean isVisible = false;

@@ -2,28 +2,26 @@ package Fight_club.Fight_Services.Domain.models;
 
 import Fight_club.Fight_Services.Domain.models.Enums.Direction;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
+@Builder
 public class Fighter {
     
-    private final String id;
+    private  String id;
     private  String userId;
     
-    private final long characterId;
-    private final String characterName;
-    private final int characterLevel;
-    private final int characterATK;
-    private final int characterDEF;
+    private  long characterId;
+    private  String characterName;
+    private  int characterLevel;
+    private  int characterATK;
+    private  int characterDEF;
 
     private Health health;
-    private final List<Skill> skills; 
+    private List<Skill> skills;
 
     private int posX;
     private int posY;

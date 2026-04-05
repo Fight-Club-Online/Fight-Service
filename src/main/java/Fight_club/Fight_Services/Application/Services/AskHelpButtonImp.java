@@ -1,12 +1,10 @@
 package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Input.AskHelpButtonUseCase;
-import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.models.Fight;
-import Fight_club.Fight_Services.Domain.models.Fighter;
 import Fight_club.Fight_Services.Domain.models.HelpButton;
-import Fight_club.Fight_Services.Domain.models.Skill;
 import lombok.AllArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;

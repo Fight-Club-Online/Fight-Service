@@ -1,7 +1,7 @@
 package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Input.ClaimHelpButtonUseCase;
-import Fight_club.Fight_Services.Application.Ports.Output.CombatRepository;
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.*;
 import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
 import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
@@ -11,7 +11,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
