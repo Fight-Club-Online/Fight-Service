@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Domain.Model;
+package Fight_club.Fight_Services.Domain.models;
 
 public class Hitbox {
     private int offsetX;

@@ -1,6 +1,6 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event;
 
-import Fight_club.Fight_Services.Domain.Model.Enums.RoomState;
+import Fight_club.Fight_Services.Domain.models.Enums.RoomState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,5 +18,5 @@ public class RoomInitializedEvent {
     private int currentPlayers;
     private int maxSpectators;
     private int currentSpectators;
-    private List<PlayerEventDTO> players ;
+    private List<RoomPlayerEvent> players ;
 }

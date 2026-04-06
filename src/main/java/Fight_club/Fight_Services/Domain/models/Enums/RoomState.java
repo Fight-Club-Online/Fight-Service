@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Domain.Model.Enums;
+package Fight_club.Fight_Services.Domain.models.Enums;
 
 
 public enum RoomState {
