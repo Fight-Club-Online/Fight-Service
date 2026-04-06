@@ -13,7 +13,10 @@ public class Fighter {
     
     private  String id;
     private  String userId;
-    
+    private boolean hasCharacter=false;
+
+
+
     private  long characterId;
     private  String characterName;
     private  int characterLevel;
@@ -43,7 +46,7 @@ public class Fighter {
     }
 
     public void receiveAttack(Skill enemySkill) {
-        if (!this.health.isAlive()) return;
+        if (!this.health.isAlive() || !hasCharacter) return;
 
         int damageToTake;
         
@@ -83,6 +86,7 @@ public class Fighter {
     }
 
     public boolean isDefeated() {
+        if(!hasCharacter) return true ;
         return !this.health.isAlive();
     }
 

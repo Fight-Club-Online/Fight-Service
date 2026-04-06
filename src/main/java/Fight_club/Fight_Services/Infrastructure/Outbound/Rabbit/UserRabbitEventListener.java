@@ -23,8 +23,4 @@ public class UserRabbitEventListener {
                  event.getUsername(), event.getUserId());
     }
 
-    @RabbitListener(queues = RabbitConfig.ROOM_QUEUE)
-    public void handleRoomInitialization(Object roomEvent) {
-        log.info("Received Room Event: {}", roomEvent);
-    }
 }

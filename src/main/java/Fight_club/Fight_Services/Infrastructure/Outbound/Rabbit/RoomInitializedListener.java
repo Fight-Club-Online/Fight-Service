@@ -32,15 +32,20 @@ public class RoomInitializedListener {
     @RabbitListener(queues = ROOM_QUEUE)
     public void handleRoomInitialized(RoomInitializedEvent roomInitializedEvent) {
         log.info("Received message: {}", roomInitializedEvent);
+        roomInitializedEvent.getPlayers().forEach(p ->
+                log.info("Player -> id: {}, type: {}", p.getUserId(), p.getPlayerType())
+        );
 
         long random = ThreadLocalRandom.current().nextLong();
 
         List<Player> specs = roomInitializedEvent.getPlayers().stream()
-                .filter(p->!p.getPlayerType().equals(PlayerType.SPECTATOR))
+                .filter(p->p.getPlayerType().equals(PlayerType.SPECTATOR))
                 .map(ToPlayer::toPlayer).toList();
         List<Fighter> figthers = roomInitializedEvent.getPlayers().stream()
-                .filter(p->!p.getPlayerType().equals(PlayerType.PLAYER))
+                .filter(p->p.getPlayerType().equals(PlayerType.PLAYER))
                 .map(ToFigther::toFighter).toList();
+        log.info("Spectators count: {}", specs.size());
+        log.info("Fighters count: {}", figthers.size());
         if(figthers.size() != 2){
             throw new RuntimeException("El numero de figthers debe ser 2");
         }
