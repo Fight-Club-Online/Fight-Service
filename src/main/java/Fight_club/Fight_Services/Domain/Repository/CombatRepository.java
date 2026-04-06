@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Ports.Output;
+package Fight_club.Fight_Services.Domain.Repository;
 
 import java.util.Optional;
 import Fight_club.Fight_Services.Domain.models.Fight; 

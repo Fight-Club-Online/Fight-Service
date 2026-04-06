@@ -1,12 +1,15 @@
 package Fight_club.Fight_Services.Domain.models;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Data
+
 public class Health {
-    private final int currentHealth;
+    private  int currentHealth;
     private final int maxHealth;
 
     private Health(int currentHealth, int maxHealth) {

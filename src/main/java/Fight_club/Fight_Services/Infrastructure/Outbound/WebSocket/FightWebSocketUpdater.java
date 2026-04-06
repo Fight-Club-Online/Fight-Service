@@ -2,6 +2,7 @@ package Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.models.Fight;
+import Fight_club.Fight_Services.Domain.models.HelpButton;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -19,4 +20,20 @@ public class FightWebSocketUpdater implements FightWsBroker {
                 "/topic/fight." + fightId,
                 state);
     }
+
+    @Override
+    public void updateHelpButton(String fightId, HelpButton button) {
+        messagingTemplate.convertAndSend(
+                "/topic/fight." + fightId,
+                button);
+    }
+
+    @Override
+    public void changeFighters(String fightId, Fight fight) {
+        messagingTemplate.convertAndSend(
+                "/topic/fight." + fightId,
+                fight);
+    }
+
+
 }
