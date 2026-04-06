@@ -54,8 +54,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public TopicExchange userExchange() {
-        return new TopicExchange(EXCHANGE_USER);
+    public DirectExchange userExchange() {
+        return new DirectExchange(EXCHANGE_USER);
     }
 
     @Bean
