@@ -14,7 +14,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic"); // ruta q envia el back al front (escuchar)
         registry.setApplicationDestinationPrefixes("/fightService"); //ruta q envia el front al nack (enviar)
-
     }
 
     @Override

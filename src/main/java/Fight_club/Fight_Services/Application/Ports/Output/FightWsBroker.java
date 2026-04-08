@@ -8,4 +8,5 @@ public interface FightWsBroker {
     void fightStateUpdate(String fightId, Fight state);
     void updateHelpButton(String fightId, HelpButton button);
     void changeFighters(String fightId, Fight fight);
+    void selectFighter(String fightId,Fight fight);
 }

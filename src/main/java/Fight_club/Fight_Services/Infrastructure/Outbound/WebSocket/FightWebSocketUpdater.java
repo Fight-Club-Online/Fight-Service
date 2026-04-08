@@ -17,23 +17,28 @@ public class FightWebSocketUpdater implements FightWsBroker {
     @Override
     public void fightStateUpdate(String fightId, Fight state) {
         messagingTemplate.convertAndSend(
-                "/topic/fight." + fightId,
+                "/fight." + fightId,
                 state);
     }
 
     @Override
     public void updateHelpButton(String fightId, HelpButton button) {
         messagingTemplate.convertAndSend(
-                "/topic/fight." + fightId,
+                "/fight." + fightId,
                 button);
     }
 
     @Override
     public void changeFighters(String fightId, Fight fight) {
         messagingTemplate.convertAndSend(
-                "/topic/fight." + fightId,
+                "/fight." + fightId,
                 fight);
     }
 
-
+    @Override
+    public void selectFighter(String fightId, Fight fight) {
+        messagingTemplate.convertAndSend(
+                "/fight." + fightId,
+                fight);
+    }
 }
