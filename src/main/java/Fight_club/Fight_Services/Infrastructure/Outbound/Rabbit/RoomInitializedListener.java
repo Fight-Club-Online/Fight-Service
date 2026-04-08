@@ -13,6 +13,7 @@ import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.RoomInitia
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.RoomPlayerEvent;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public class RoomInitializedListener {
         log.info("Spectators count: {}", specs.size());
         log.info("Fighters count: {}", figthers.size());
         if(figthers.size() != 2){
-            throw new RuntimeException("El numero de figthers debe ser 2");
+            throw new AmqpRejectAndDontRequeueException("El numero de figthers debe ser 2");
         }
         HelpButton helpButton = HelpButton.builder()
                 .buttonId(roomInitializedEvent.getRoomId()+random)

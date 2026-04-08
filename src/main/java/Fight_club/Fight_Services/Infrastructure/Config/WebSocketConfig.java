@@ -20,10 +20,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/fightService")
-                // Es mejor listar tus orígenes conocidos para evitar bloqueos de seguridad
                 .setAllowedOriginPatterns(
                     "http://localhost:5173", 
-                    "https://lamentaciones-frontend-juan-caballeros-projects.vercel.app/"
+                    "https://lamentaciones-frontend-juan-caballeros-projects.vercel.app/",
+                     "*"
                 )
                 .withSockJS(); 
     }

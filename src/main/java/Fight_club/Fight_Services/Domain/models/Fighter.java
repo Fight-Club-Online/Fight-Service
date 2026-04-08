@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
+@NoArgsConstructor
 public class Fighter {
     
     private  String id;

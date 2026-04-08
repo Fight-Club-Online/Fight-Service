@@ -9,6 +9,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Builder
 @Data
+@NoArgsConstructor
 public class Fight {
     private  String id;
     private  Fighter player1;

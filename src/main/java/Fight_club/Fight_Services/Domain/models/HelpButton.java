@@ -5,10 +5,12 @@ import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @Data
 @Builder
+@NoArgsConstructor
 public class HelpButton {
     private long buttonId;
     private boolean isVisible = false;
