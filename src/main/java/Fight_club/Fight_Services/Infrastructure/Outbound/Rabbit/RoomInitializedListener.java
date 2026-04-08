@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,6 +29,7 @@ import static Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.Map
 public class RoomInitializedListener {
 
     private final CombatRepository combatRepository;
+    private final RestTemplate restTemplate;
 
     @RabbitListener(queues = ROOM_QUEUE)
     public void handleRoomInitialized(RoomInitializedEvent roomInitializedEvent) {
@@ -68,5 +70,16 @@ public class RoomInitializedListener {
                  .helpButton(helpButton)
                  .build();
         combatRepository.save(f);
+        log.info("Combat saved in repository: {}", f.getId());
+        activarVoiceChat(roomInitializedEvent.getRoomId());
+    }
+    private void activarVoiceChat(long roomId){
+        try{
+                String url = "mongodb+srv://pacoandres03_db_user:admin@blueteam.biz5ysx.mongodb.net/VOICE-CHAT?retryWrites=true&w=majority";
+                restTemplate.postForEntity(url, null, String.class);
+                log.info("✅ Voice Chat habilitado para la sala: {}", roomId);
+        }catch (Exception e){
+                log.error("❌ No se pudo conectar con el microservicio de Voz: {}", e.getMessage());
+        }
     }
 }
