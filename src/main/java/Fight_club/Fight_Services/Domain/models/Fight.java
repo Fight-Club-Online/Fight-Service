@@ -1,7 +1,5 @@
 package Fight_club.Fight_Services.Domain.models;
 
-
-import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import lombok.*;
 
 import java.util.List;
