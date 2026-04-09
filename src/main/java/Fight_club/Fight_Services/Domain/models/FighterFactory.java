@@ -9,7 +9,7 @@ public class FighterFactory {
         // (Ataque Básico)
         Skill jab = new Skill(
             FighterAction.BASIC_ATTACK, 
-            10,  
+            6,  
             0,   
             4,   
             2,   
@@ -21,7 +21,7 @@ public class FighterFactory {
         // (Ataque Especial)
         Skill hook = new Skill(
             FighterAction.SPECIAL_ATTACK, 
-            25,  
+            15,  
             2000,
             12,  
             4,   

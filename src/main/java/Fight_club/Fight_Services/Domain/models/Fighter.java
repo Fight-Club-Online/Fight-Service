@@ -50,21 +50,17 @@ public class Fighter {
         if (!this.health.isAlive() || !hasCharacter) return;
 
         int damageToTake;
-        
         if (this.isBlocking) {
             damageToTake = Math.max(1, enemySkill.baseDamage() / 10);
-            this.currentStunFrames = enemySkill.blockStun();
         } else {
-            damageToTake = Math.max(1, enemySkill.baseDamage() - (this.characterDEF / 5));
-            this.currentStunFrames = enemySkill.hitStun();
-            this.currentAction = FighterAction.IDLE;
+            damageToTake = Math.max(2, enemySkill.baseDamage() - (this.characterDEF / 3));
         }
         
         this.health = this.health.takeDamage(damageToTake);
     }
 
     public void executeAction(FighterAction action) {
-
+        if (action == FighterAction.JUMP && !this.isGrounded) return;
         this.currentAction = action;
         this.isBlocking = (action == FighterAction.BLOCK);
         
