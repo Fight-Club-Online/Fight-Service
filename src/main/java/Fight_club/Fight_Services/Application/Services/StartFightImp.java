@@ -18,13 +18,13 @@ public class StartFightImp implements StartFightUseCase {
     private final CombatRepository combatRepository;
 
     @Override
-    public void startFight(String fightId) {
+    public Fight startFight(String fightId) {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
         try{
             Fight fight = combatRepository.findById(fightId)
                     .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
-            if(fight.isActive()) return;
+            if(fight.isActive()) return fight;
 
             if(!fight.getPlayer1().getHealth().isAlive() || !fight.getPlayer2().getHealth().isAlive()){
                 throw new RuntimeException("El usuario no esta vivo");
@@ -32,7 +32,7 @@ public class StartFightImp implements StartFightUseCase {
 
             fight.setActive(true);
             combatRepository.save(fight);
-
+            return fight;
 
         }catch (Exception e){
             Thread.currentThread().interrupt();

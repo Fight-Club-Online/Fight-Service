@@ -1,18 +1,16 @@
 package Fight_club.Fight_Services.Domain.models;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Data
-
+@NoArgsConstructor
 public class Health {
     private  int currentHealth;
-    private final int maxHealth;
+    private  int maxHealth;
 
-    private Health(int currentHealth, int maxHealth) {
+    public Health(int currentHealth, int maxHealth) {
         if(maxHealth <= 0) {
             throw new IllegalArgumentException("Max health must be greater than 0");
         }

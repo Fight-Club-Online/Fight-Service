@@ -15,8 +15,8 @@ public class FightRestController {
     private final GetFightUseCase getFightUseCase;
 
     @PutMapping("/start")
-    public void startFight(String fightId){
-        startFightUseCase.startFight(fightId);
+    public Fight startFight(String fightId){
+        return startFightUseCase.startFight(fightId);
     }
 
     @GetMapping("/{fightId}")
