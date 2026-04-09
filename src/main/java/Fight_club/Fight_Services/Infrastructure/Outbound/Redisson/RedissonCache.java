@@ -7,6 +7,9 @@ import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -34,5 +37,13 @@ public class RedissonCache implements CombatRepository {
     public void delete(String fightId) {
         RMapCache<String, Fight> fightsMap = redisson.getMapCache(CACHE_NAME);
         fightsMap.remove(fightId);
+    }
+
+    @Override
+    public List<Fight> findAll() {
+        RMapCache<String, Fight> fightsMap = redisson.getMapCache(CACHE_NAME);
+        return new ArrayList<>(fightsMap.values());
+
+
     }
 }

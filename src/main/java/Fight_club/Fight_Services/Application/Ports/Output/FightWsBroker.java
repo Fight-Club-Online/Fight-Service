@@ -6,7 +6,7 @@ import Fight_club.Fight_Services.Domain.models.HelpButton;
 
 public interface FightWsBroker {
     void fightStateUpdate(String fightId, Fight state);
-    void updateHelpButton(String fightId, HelpButton button);
+    void updateHelpButton(String fightId, HelpButton helpButton);
     void changeFighters(String fightId, Fight fight);
     void selectFighter(String fightId,Fight fight);
 }

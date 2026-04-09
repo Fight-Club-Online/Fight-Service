@@ -64,7 +64,6 @@ public class Fighter {
     }
 
     public void executeAction(FighterAction action) {
-        if (this.currentStunFrames > 0) return;
 
         this.currentAction = action;
         this.isBlocking = (action == FighterAction.BLOCK);

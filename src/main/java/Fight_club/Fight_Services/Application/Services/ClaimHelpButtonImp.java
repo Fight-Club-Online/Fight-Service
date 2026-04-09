@@ -4,6 +4,7 @@ import Fight_club.Fight_Services.Application.Ports.Input.ClaimHelpButtonUseCase;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.*;
 import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
 import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocketUpdater;
 import lombok.AllArgsConstructor;
@@ -36,11 +37,11 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
                         .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
                 HelpButton helpButton = fight.getHelpButton();
-                if (helpButton.getClaimedByUserId() != null) {
+                if ((helpButton.getClaimedByUserId() != null && !helpButton.getClaimedByUserId().isEmpty() )|| helpButton.getStatus() == ButtonStatus.CLAIMED ) {
                     return;
                 }
                 helpButton.setClaimedByUserId(userId);
-
+                helpButton.setStatus(ButtonStatus.CLAIMED);
                 if (fight.getSpectatorByUserId(userId).isPresent()) {
                     Player p = fight.getSpectatorByUserId(userId).get();
                     helpButton.setType(ButtomClaimedType.SPECTATOR);
@@ -51,6 +52,7 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
                     Fighter f = fight.getFighterByUserId(userId);
                     healOpponent(f);
                     helpButton.setType(ButtomClaimedType.OPPONENT);
+                    helpButton.deactivate();
                 }
                 helpButton.setVisible(false);
 

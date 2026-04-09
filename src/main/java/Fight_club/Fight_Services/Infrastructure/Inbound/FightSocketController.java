@@ -1,10 +1,7 @@
 package Fight_club.Fight_Services.Infrastructure.Inbound;
 
 
-import Fight_club.Fight_Services.Application.Ports.Input.AskHelpButtonUseCase;
-import Fight_club.Fight_Services.Application.Ports.Input.ClaimHelpButtonUseCase;
-import Fight_club.Fight_Services.Application.Ports.Input.ProcessCombatInputUseCase;
-import Fight_club.Fight_Services.Application.Ports.Input.SelectFighterUseCase;
+import Fight_club.Fight_Services.Application.Ports.Input.*;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
 import Fight_club.Fight_Services.Infrastructure.Inbound.DTO.Socket.PlayerInputDto;
 import Fight_club.Fight_Services.Infrastructure.Inbound.DTO.Socket.SelectFighterDTO;
@@ -21,7 +18,7 @@ public class FightSocketController {
     private final ClaimHelpButtonUseCase claimHelpButtonUseCase;
     private final AskHelpButtonUseCase askHelpButtonUseCase;
     private final SelectFighterUseCase selectFighterUseCase;
-
+    private final TakeBackControlUseCase takeBackControlUseCase;
 
     @MessageMapping("/fight/{fightId}/input")
         public void handlePlayerInput(@DestinationVariable String fightId, @Payload PlayerInputDto input) {
@@ -40,7 +37,7 @@ public class FightSocketController {
 
     @MessageMapping("/fight/{fightId}/takeBack")
     public void takeBackFighter(@DestinationVariable String fightId, @Payload String userId) {
-
+        takeBackControlUseCase.takeBackFigther(fightId,userId);
     }
 
     @MessageMapping("/fight/{fightId}/selectCharacter")

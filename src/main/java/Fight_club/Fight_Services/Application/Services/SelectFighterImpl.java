@@ -2,18 +2,16 @@ package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Input.SelectFighterUseCase;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
+import Fight_club.Fight_Services.Domain.models.*;
 import Fight_club.Fight_Services.Domain.models.Enums.Direction;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
-import Fight_club.Fight_Services.Domain.models.Fight;
-import Fight_club.Fight_Services.Domain.models.Fighter;
-import Fight_club.Fight_Services.Domain.models.Health;
-import Fight_club.Fight_Services.Domain.models.Hitbox;
 import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocketUpdater;
 import lombok.AllArgsConstructor;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -38,13 +36,25 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         fighter.setCharacterATK(20);
         fighter.setCharacterDEF(10);
 
-        // Health
         Health health = new Health(100, 100);
         fighter.setHealth(health);
 
-        fighter.setSkills(new ArrayList<>());
+        List<Skill> skills = new ArrayList<>();
+        skills.add(
+                new Skill(
+                        FighterAction.BASIC_ATTACK,
+                        75,
+                        60,
+                        5,
+                        10,
+                        15,
+                        20,
+                        5
+                )
+        );
 
-        // Posición inicial
+        fighter.setSkills(skills);
+
         fighter.setPosX(0);
         fighter.setPosY(0);
         fighter.setVelocityX(0);
@@ -53,7 +63,6 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         fighter.setGrounded(true);
         fighter.setDirection(Direction.RIGHT);
 
-        // Hitbox
         Hitbox hitbox = new Hitbox();
         hitbox.setOffsetX(0);
         hitbox.setOffsetY(0);
@@ -61,7 +70,6 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         hitbox.setHeight(100);
         fighter.setHitbox(hitbox);
 
-        // Estado inicial
         fighter.setCurrentAction(FighterAction.IDLE);
         fighter.setBlocking(false);
         fighter.setCurrentStunFrames(0);
@@ -70,9 +78,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
 
 
 
-        //guardar con nuevos datos del pelad y otros
         combatRepository.save(fight);
-        //para mandar al front via ws
         fightWebSocketUpdater.selectFighter(fightId, fight);
     }
 }

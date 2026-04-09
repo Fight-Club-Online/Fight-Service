@@ -3,6 +3,7 @@ package Fight_club.Fight_Services.Application.Services;
 import Fight_club.Fight_Services.Application.Ports.Input.AskHelpButtonUseCase;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.HelpButton;
 import lombok.AllArgsConstructor;
@@ -31,8 +32,9 @@ public class AskHelpButtonImp implements AskHelpButtonUseCase {
             if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
                 Fight fight = combatRepository.findById(fightId)
                         .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
-
                 HelpButton helpButton = fight.getHelpButton();
+                if(helpButton.getStatus() == ButtonStatus.CLAIMED || !helpButton.getClaimedByUserId().isEmpty()) return;
+
                 helpButton.setVisible(true);
                 combatRepository.save(fight);
                 fightWsBroker.updateHelpButton(fightId, helpButton);

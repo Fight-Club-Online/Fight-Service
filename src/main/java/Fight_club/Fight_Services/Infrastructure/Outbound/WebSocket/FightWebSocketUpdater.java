@@ -22,10 +22,11 @@ public class FightWebSocketUpdater implements FightWsBroker {
     }
 
     @Override
-    public void updateHelpButton(String fightId, HelpButton button) {
+    public void updateHelpButton(String fightId,HelpButton helpButton) {
         messagingTemplate.convertAndSend(
                 "/topic/fight." + fightId,
-                button);
+                helpButton);
+        System.out.println("boton: " + helpButton);
     }
 
     @Override
@@ -33,6 +34,7 @@ public class FightWebSocketUpdater implements FightWsBroker {
         messagingTemplate.convertAndSend(
                 "/topic/fight." + fightId,
                 fight);
+        System.out.println("Bton cambio: " + fight.getHelpButton());
     }
 
     @Override

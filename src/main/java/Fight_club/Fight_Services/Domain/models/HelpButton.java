@@ -21,6 +21,7 @@ public class HelpButton {
     private ButtomClaimedType type=null;
 
     public void activate(String userId) {
+        if(this.status != ButtonStatus.INACTIVE) return;
         this.status = ButtonStatus.ACTIVE;
         this.activatedForUserId = userId;
     }
