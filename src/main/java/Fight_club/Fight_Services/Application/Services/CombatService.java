@@ -2,7 +2,6 @@ package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
-import Fight_club.Fight_Services.Domain.models.Enums.Direction;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -32,13 +31,17 @@ public class CombatService implements ProcessCombatInputUseCase {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
         try {
-            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
-                Fight fight = combatRepository.findById(fightId)
-                        .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+            if (lock.tryLock(1, 2, TimeUnit.SECONDS)) { 
+                
+                Fight fight = FightLoopService.activeFights.get(fightId);
+
+                if (fight == null) {
+                    fight = combatRepository.findById(fightId)
+                            .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+                }
 
                 Fighter attacker = fight.getFighterByUserId(userId);
                 Fighter defender = fight.getOpponentOf(userId);
-
                 attacker.executeAction(action);
 
                 if (isAttackAction(action)) {
@@ -46,30 +49,28 @@ public class CombatService implements ProcessCombatInputUseCase {
 
                     if (checkCollision(attacker, defender)) {
                         defender.receiveAttack(skillUsed);
+                        
+                        defender.setCurrentAction(FighterAction.HURT);
 
                         if (defender.isDefeated()) {
                             handleMatchEnd(fightId, attacker.getUserId());
                         }
-
                         be.activate(
                                 fight.getHelpButton(),
                                 defender.getHealth().getCurrentHealth(),
                                 defender.getHealth().getMaxHealth(),
                                 defender.getUserId()
                         );
-                        fightWsBroker.fightStateUpdate(fightId, fight);
-
                     }
-
                 }
-                combatRepository.save(fight);
+
                 updateActiveFight(fight);
-
-
+                
+                fightWsBroker.fightStateUpdate(fightId, fight);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to acquire lock for fight: " + fightId, e);
+            throw new RuntimeException("Lock interrupted for fight: " + fightId, e);
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();

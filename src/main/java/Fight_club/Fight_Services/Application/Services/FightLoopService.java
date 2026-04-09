@@ -10,79 +10,75 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class FightLoopService {
 
-    private final CombatRepository combatRepository;
+    private final CombatRepository combatRepository; // Solo lo usaremos para persistencia final
     private final FightWsBroker fightWsBroker;
 
-    public  static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
 
+    
+    private static final int MOVE_SPEED = 6;      
+    private static final int JUMP_FORCE = -16;    
+    private static final int GRAVITY = 1;         
+    private static final int GROUND_Y = 280;      
 
-    private static final int MOVE_SPEED = 3;
-    private static final int JUMP_SPEED = 8;
-    private static final int GRAVITY = 2;
-    private static final int GROUND_Y = 0;
-
-
-
-
-    @Scheduled(fixedRate = 33)
+    @Scheduled(fixedRate = 16) 
     public void tick() {
-
         for (Fight fight : activeFights.values()) {
-            if (!fight.isActive()) {
-                continue;
-            }
+            if (!fight.isActive()) continue;
 
-            boolean changed = false;
+            boolean p1Changed = applyPhysics(fight.getPlayer1());
+            boolean p2Changed = applyPhysics(fight.getPlayer2());
 
-            changed |= applyPhysics(fight.getPlayer1());
-            changed |= applyPhysics(fight.getPlayer2());
-
-            if (changed) {
-                combatRepository.save(fight);
+            if (p1Changed || p2Changed) {
                 fightWsBroker.fightStateUpdate(fight.getId(), fight);
             }
         }
     }
 
     private boolean applyPhysics(Fighter fighter) {
+        if (fighter == null || fighter.isDefeated()) return false;
+
         boolean changed = false;
-
-        if (fighter == null || fighter.isDefeated()) {
-            return false;
-        }
-
         FighterAction action = fighter.getCurrentAction();
 
-        switch (action) {
-            case MOVE_LEFT -> {
-                int newX = Math.max(0, fighter.getPosX() - MOVE_SPEED);
-                fighter.setPosX(newX);
-                fighter.setDirection(Direction.LEFT);
-                changed = true;
-            }
-            case MOVE_RIGHT -> {
-                int newX = Math.min(750, fighter.getPosX() + MOVE_SPEED);
-                fighter.setPosX(newX);
-                fighter.setDirection(Direction.RIGHT);
-                changed = true;
-            }
-            case JUMP -> {
-                fighter.setPosY(fighter.getPosY() - JUMP_SPEED);
-                changed = true;
-            }
-            default -> {
-            }
+        if (fighter.getCurrentStunFrames() > 0) {
+            fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
+            return true; 
         }
 
-        if (fighter.getPosY() < GROUND_Y) {
-            fighter.setPosY(Math.min(GROUND_Y, fighter.getPosY() + GRAVITY));
+        if (action == FighterAction.MOVE_LEFT) {
+            fighter.setPosX(Math.max(0, fighter.getPosX() - MOVE_SPEED));
+            fighter.setDirection(Direction.LEFT);
+            changed = true;
+        } else if (action == FighterAction.MOVE_RIGHT) {
+            fighter.setPosX(Math.min(740, fighter.getPosX() + MOVE_SPEED));
+            fighter.setDirection(Direction.RIGHT);
+            changed = true;
+        }
+
+        if (action == FighterAction.JUMP && fighter.isGrounded()) {
+            fighter.setVelocityY(JUMP_FORCE);
+            fighter.setGrounded(false);
+            fighter.setCurrentAction(FighterAction.IDLE);
+            changed = true;
+        }
+
+        if (!fighter.isGrounded()) {
+            fighter.setPosY(fighter.getPosY() + fighter.getVelocityY());
+            fighter.setVelocityY(fighter.getVelocityY() + GRAVITY);
+            changed = true;
+        }
+
+        if (fighter.getPosY() >= GROUND_Y) {
+            fighter.setPosY(GROUND_Y);
+            fighter.setVelocityY(0);
+            fighter.setGrounded(true);
             changed = true;
         }
 
