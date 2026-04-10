@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -23,15 +22,15 @@ public class FightLoopService {
     public  static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
 
 
-    private static final int MOVE_SPEED = 3;
-    private static final int JUMP_SPEED = 8;
-    private static final int GRAVITY = 2;
-    private static final int GROUND_Y = 0;
+    private static final int MOVE_SPEED = 6;
+    private static final int JUMP_SPEED = -16;
+    private static final int GRAVITY = 1;
+    private static final int GROUND_Y = 280;
 
 
 
 
-    @Scheduled(fixedRate = 33)
+    @Scheduled(fixedRate = 16)
     public void tick() {
 
         for (Fight fight : activeFights.values()) {
