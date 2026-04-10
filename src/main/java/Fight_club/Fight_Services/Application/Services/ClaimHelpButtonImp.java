@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static Fight_club.Fight_Services.Application.Services.FightLoopService.updateActiveFight;
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
 import static Fight_club.Fight_Services.Domain.models.Enums.PlayerType.SPECTATOR;
 
@@ -59,8 +58,6 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
 
                 combatRepository.save(fight);
                 fightWebSocketUpdater.changeFighters(fightId, fight);
-                updateActiveFight(fight);
-
             }
 
         }catch (InterruptedException e){

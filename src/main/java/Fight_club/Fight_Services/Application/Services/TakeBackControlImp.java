@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static Fight_club.Fight_Services.Application.Services.FightLoopService.updateActiveFight;
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
 
 @Service
@@ -52,9 +51,8 @@ public class TakeBackControlImp implements TakeBackControlUseCase {
                 originalFigther.setUserId(originalFigtherId);
                 helpButton.deactivate();
                 combatRepository.save(fight);
-                fightWebSocketUpdater.changeFighters(fightId, fight);
-                updateActiveFight(fight);
-            }
+                fightWebSocketUpdater.changeFighters(fightId, fight);}
+
 
         }catch (InterruptedException e){
             Thread.currentThread().interrupt();

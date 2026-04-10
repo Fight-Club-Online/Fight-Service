@@ -32,7 +32,7 @@ public class CombatService implements ProcessCombatInputUseCase {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
         try {
-            if (lock.tryLock(1, 5, TimeUnit.SECONDS)) {
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
                 Fight fight = combatRepository.findById(fightId)
                         .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
