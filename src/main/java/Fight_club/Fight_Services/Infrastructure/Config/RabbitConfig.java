@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String EXCHANGE_ROOM = "room.exchange";
-    public static final String ROOM_QUEUE = "room.queue";
+    public static final String ROOM_QUEUE = "fight.room.queue";
     public static final String ROUTING_KEY_ROOM = "room.initialized";
 
     public static final String EXCHANGE_USER = "user.events";
-    public static final String QUEUE_USER_REGISTERED = "fight.user.registered.queue";
+    public static final String QUEUE_USER_REGISTERED = "fights.user.registered.queue";
     public static final String ROUTING_KEY_USER_REG = "user.registered";
     
-    public static final String QUEUE_GUEST_REGISTERED = "fight.guest.registered.queue";
+    public static final String QUEUE_GUEST_REGISTERED = "fights.guest.registered.queue";
     public static final String ROUTING_KEY_GUEST = "user.guest.registered";
     
 
