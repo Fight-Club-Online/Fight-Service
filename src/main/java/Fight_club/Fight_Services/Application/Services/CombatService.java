@@ -25,19 +25,12 @@ public class CombatService implements ProcessCombatInputUseCase {
     private final FightWsBroker fightWsBroker;
     private final RedissonClient redisson;
 
-    // Movido a constante para asegurar inicialización
-    private final ButtonEvent be = (btn, health, maxHe, userId) -> {
-        if (btn != null && health <= maxHe * 3 / 4) {
-            btn.activate(userId);
-        }
-    };
-
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
         try {
-            if (lock.tryLock(2, 4, TimeUnit.SECONDS)) { 
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) { 
                 
                 Fight fight = FightLoopService.activeFights.get(fightId);
 
@@ -75,14 +68,19 @@ public class CombatService implements ProcessCombatInputUseCase {
                                     defender.getUserId()
                             );
                         }
+                        
+                        fightWsBroker.fightStateUpdate(fightId, fight);
                     }
                 }
 
+                combatRepository.save(fight); 
                 updateActiveFight(fight);
+                
                 fightWsBroker.fightStateUpdate(fightId, fight);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Lock interrumpido para la pelea: " + fightId, e);
         } catch (Exception e) {
             System.err.println("Error procesando input de combate: " + e.getMessage());
         } finally {
@@ -91,6 +89,14 @@ public class CombatService implements ProcessCombatInputUseCase {
             }
         }
     }
+
+
+    ButtonEvent be = (btn, health, maxHe, userId) -> {
+        if (health <= maxHe * 3 / 4) {
+            btn.activate(userId);
+        }
+    };
+
 
 
     private boolean isAttackAction(FighterAction action) {
