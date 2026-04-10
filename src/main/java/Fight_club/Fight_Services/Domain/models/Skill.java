@@ -13,9 +13,8 @@ public record Skill (
     int blockStun
 ) {
     public Skill {
-    
-        if (baseDamage < 0) throw new IllegalArgumentException("Base damage cannot be negative");
-        if (startUpFrames < 0) throw new IllegalArgumentException("Startup frames cannot be negative");
-        if (activeFrames < 1) throw new IllegalArgumentException("Active frames must be at least 1");
+        baseDamage = Math.max(0, baseDamage);
+        startUpFrames = Math.max(0, startUpFrames);
+        activeFrames = Math.max(1, activeFrames);
     }
 }

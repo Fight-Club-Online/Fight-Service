@@ -25,23 +25,35 @@ public class CombatService implements ProcessCombatInputUseCase {
     private final FightWsBroker fightWsBroker;
     private final RedissonClient redisson;
 
+    // Movido a constante para asegurar inicialización
+    private final ButtonEvent be = (btn, health, maxHe, userId) -> {
+        if (btn != null && health <= maxHe * 3 / 4) {
+            btn.activate(userId);
+        }
+    };
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
         try {
-            if (lock.tryLock(1, 2, TimeUnit.SECONDS)) { 
+            if (lock.tryLock(2, 4, TimeUnit.SECONDS)) { 
                 
                 Fight fight = FightLoopService.activeFights.get(fightId);
 
                 if (fight == null) {
-                    fight = combatRepository.findById(fightId)
-                            .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+                    fight = combatRepository.findById(fightId).orElse(null);
+                    if (fight == null) {
+                        System.err.println("Pelea no encontrada en el sistema: " + fightId);
+                        return; 
+                    }
                 }
 
                 Fighter attacker = fight.getFighterByUserId(userId);
                 Fighter defender = fight.getOpponentOf(userId);
+                
+                if (attacker == null || defender == null) return;
+
                 attacker.executeAction(action);
 
                 if (isAttackAction(action)) {
@@ -49,41 +61,36 @@ public class CombatService implements ProcessCombatInputUseCase {
 
                     if (checkCollision(attacker, defender)) {
                         defender.receiveAttack(skillUsed);
-                        
                         defender.setCurrentAction(FighterAction.HURT);
 
                         if (defender.isDefeated()) {
                             handleMatchEnd(fightId, attacker.getUserId());
                         }
-                        be.activate(
-                                fight.getHelpButton(),
-                                defender.getHealth().getCurrentHealth(),
-                                defender.getHealth().getMaxHealth(),
-                                defender.getUserId()
-                        );
+
+                        if (fight.getHelpButton() != null) {
+                            be.activate(
+                                    fight.getHelpButton(),
+                                    defender.getHealth().getCurrentHealth(),
+                                    defender.getHealth().getMaxHealth(),
+                                    defender.getUserId()
+                            );
+                        }
                     }
                 }
 
                 updateActiveFight(fight);
-                
                 fightWsBroker.fightStateUpdate(fightId, fight);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Lock interrupted for fight: " + fightId, e);
+        } catch (Exception e) {
+            System.err.println("Error procesando input de combate: " + e.getMessage());
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
     }
-
-    ButtonEvent be = (btn, health, maxHe, userId) -> {
-        if (health <= maxHe * 3 / 4) {
-            btn.activate(userId);
-        }
-    };
-
 
 
     private boolean isAttackAction(FighterAction action) {
