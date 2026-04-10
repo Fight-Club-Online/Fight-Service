@@ -64,6 +64,7 @@ public class CombatService implements ProcessCombatInputUseCase {
                         defender.setCurrentAction(FighterAction.HURT);
 
                         if (defender.isDefeated()) {
+                            fight.finishFight();
                             handleMatchEnd(fightId, attacker.getUserId());
                         }
 
