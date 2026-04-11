@@ -32,9 +32,13 @@ public class CombatService implements ProcessCombatInputUseCase {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
 
         try {
-            if (lock.tryLock(1, 5, TimeUnit.SECONDS)) {
-                Fight fight = combatRepository.findById(fightId)
-                        .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+            if (lock.tryLock(2, 5, TimeUnit.SECONDS)) {
+                Fight fight = FightLoopService.activeFights.get(fightId);
+
+                if (fight == null) {
+                    fight = combatRepository.findById(fightId)
+                            .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+                }
 
                 Fighter attacker = fight.getFighterByUserId(userId);
                 Fighter defender = fight.getOpponentOf(userId);
@@ -57,11 +61,12 @@ public class CombatService implements ProcessCombatInputUseCase {
                                 defender.getHealth().getMaxHealth(),
                                 defender.getUserId()
                         );
-                        fightWsBroker.fightStateUpdate(fightId, fight);
+                        //fightWsBroker.fightStateUpdate(fightId, fight);
 
                     }
 
                 }
+                fightWsBroker.fightStateUpdate(fightId, fight);
                 combatRepository.save(fight);
                 updateActiveFight(fight);
 
