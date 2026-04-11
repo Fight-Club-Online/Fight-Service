@@ -45,4 +45,9 @@ public class Fight {
     public void finishFight() {
         this.isActive = false;
     }
+
+
+    public boolean isPlayerOne(String userId) {
+        return player1.getUserId().equals(userId);
+    }
 }

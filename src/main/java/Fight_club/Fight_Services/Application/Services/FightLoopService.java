@@ -59,29 +59,42 @@ public class FightLoopService {
 
         FighterAction action = fighter.getCurrentAction();
 
+        if (fighter.getCurrentStunFrames() > 0) {
+            fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
+            return true;
+        }
+
+
         switch (action) {
             case MOVE_LEFT -> {
-                int newX = Math.max(0, fighter.getPosX() - MOVE_SPEED);
-                fighter.setPosX(newX);
+                fighter.setPosX(Math.max(0, fighter.getPosX() - MOVE_SPEED));
                 fighter.setDirection(Direction.LEFT);
                 changed = true;
             }
             case MOVE_RIGHT -> {
-                int newX = Math.min(750, fighter.getPosX() + MOVE_SPEED);
-                fighter.setPosX(newX);
+                fighter.setPosX(Math.min(750, fighter.getPosX() + MOVE_SPEED));
                 fighter.setDirection(Direction.RIGHT);
                 changed = true;
-            }
-            case JUMP -> {
-                fighter.setPosY(fighter.getPosY() - JUMP_SPEED);
-                changed = true;
-            }
-            default -> {
+
             }
         }
+        if (action == FighterAction.JUMP && fighter.isGrounded()) {
+            fighter.setVelocityY(JUMP_SPEED);
+            fighter.setGrounded(false);
+            fighter.setCurrentAction(FighterAction.IDLE);
+            changed = true;
+        }
 
-        if (fighter.getPosY() < GROUND_Y) {
-            fighter.setPosY(Math.min(GROUND_Y, fighter.getPosY() + GRAVITY));
+        if (!fighter.isGrounded()) {
+            fighter.setPosY(fighter.getPosY() + fighter.getVelocityY());
+            fighter.setVelocityY(fighter.getVelocityY() + GRAVITY);
+            changed = true;
+        }
+
+        if (fighter.getPosY() >= GROUND_Y) {
+            fighter.setPosY(GROUND_Y);
+            fighter.setVelocityY(0);
+            fighter.setGrounded(true);
             changed = true;
         }
 

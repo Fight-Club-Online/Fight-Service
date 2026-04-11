@@ -55,13 +55,21 @@ public class SelectFighterImpl implements SelectFighterUseCase {
 
         fighter.setSkills(skills);
 
-        fighter.setPosX(0);
-        fighter.setPosY(0);
+        if(fight.isPlayerOne(userId)){
+            fighter.setPosX(0);
+            fighter.setPosY(280);
+            fighter.setDirection(Direction.RIGHT);
+        }else{
+            fighter.setPosX(750);
+            fighter.setPosY(280);
+            fighter.setDirection(Direction.LEFT);
+
+        }
+
         fighter.setVelocityX(0);
         fighter.setVelocityY(0);
 
         fighter.setGrounded(true);
-        fighter.setDirection(Direction.RIGHT);
 
         Hitbox hitbox = new Hitbox();
         hitbox.setOffsetX(0);

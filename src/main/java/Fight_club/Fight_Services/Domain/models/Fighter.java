@@ -64,7 +64,7 @@ public class Fighter {
     }
 
     public void executeAction(FighterAction action) {
-
+        if (action == FighterAction.JUMP && !this.isGrounded) return;
         this.currentAction = action;
         this.isBlocking = (action == FighterAction.BLOCK);
         
