@@ -12,6 +12,7 @@ import Fight_club.Fight_Services.Domain.models.Fighter;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.Skill;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
+import Fight_club.Fight_Services.Infrastructure.Outbound.Http.VoiceChatNotifier;
 import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ public class CombatService implements ProcessCombatInputUseCase {
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
     private final RedissonClient redisson;
+    private final VoiceChatNotifier voiceChatNotifier;
 
 
     @Override
@@ -103,5 +105,7 @@ public class CombatService implements ProcessCombatInputUseCase {
 
     private void handleMatchEnd(String fightId, String winnerId) {
         System.out.println("Combate " + fightId + " finalizado. Ganador: " + winnerId);
+        voiceChatNotifier.notifyFightFinished(fightId);
     }
+    
 }
