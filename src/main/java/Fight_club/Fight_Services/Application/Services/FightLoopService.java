@@ -19,86 +19,69 @@ public class FightLoopService {
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
 
-    public  static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
 
-
-    private static final int MOVE_SPEED = 6;
+    private static final int MOVE_SPEED = 8; 
     private static final int JUMP_SPEED = -16;
     private static final int GRAVITY = 1;
     private static final int GROUND_Y = 280;
 
-
-
-
-    @Scheduled(fixedRate = 16)
+    @Scheduled(fixedRate = 16) 
     public void tick() {
-
         for (Fight fight : activeFights.values()) {
-            if (!fight.isActive()) {
-                continue;
-            }
+            if (!fight.isActive()) continue;
+            
+            boolean p1Changed = applyPhysics(fight.getPlayer1());
+            boolean p2Changed = applyPhysics(fight.getPlayer2());
 
-            boolean changed = false;
-
-            changed |= applyPhysics(fight.getPlayer1());
-            changed |= applyPhysics(fight.getPlayer2());
-
-            if (changed) {
-                combatRepository.save(fight);
+        
+            if (p1Changed || p2Changed) {
                 fightWsBroker.fightStateUpdate(fight.getId(), fight);
             }
         }
     }
 
     private boolean applyPhysics(Fighter fighter) {
-        boolean changed = false;
-
-        if (fighter == null || fighter.isDefeated()) {
-            return false;
-        }
-
+        if (fighter == null || fighter.isDefeated()) return false;
+        
+        boolean moved = false;
         FighterAction action = fighter.getCurrentAction();
 
         if (fighter.getCurrentStunFrames() > 0) {
             fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
-            return true;
+            return true; 
         }
 
-
-        switch (action) {
-            case MOVE_LEFT -> {
-                fighter.setPosX(Math.max(0, fighter.getPosX() - MOVE_SPEED));
-                fighter.setDirection(Direction.LEFT);
-                changed = true;
-            }
-            case MOVE_RIGHT -> {
-                fighter.setPosX(Math.min(750, fighter.getPosX() + MOVE_SPEED));
-                fighter.setDirection(Direction.RIGHT);
-                changed = true;
-
-            }
+        if (action == FighterAction.MOVE_LEFT) {
+            fighter.setPosX(Math.max(0, fighter.getPosX() - MOVE_SPEED));
+            fighter.setDirection(Direction.LEFT);
+            moved = true;
+        } else if (action == FighterAction.MOVE_RIGHT) {
+            fighter.setPosX(Math.min(750, fighter.getPosX() + MOVE_SPEED));
+            fighter.setDirection(Direction.RIGHT);
+            moved = true;
         }
+
         if (action == FighterAction.JUMP && fighter.isGrounded()) {
             fighter.setVelocityY(JUMP_SPEED);
             fighter.setGrounded(false);
-            fighter.setCurrentAction(FighterAction.IDLE);
-            changed = true;
+            moved = true;
         }
 
         if (!fighter.isGrounded()) {
             fighter.setPosY(fighter.getPosY() + fighter.getVelocityY());
             fighter.setVelocityY(fighter.getVelocityY() + GRAVITY);
-            changed = true;
+            moved = true;
         }
 
         if (fighter.getPosY() >= GROUND_Y) {
             fighter.setPosY(GROUND_Y);
             fighter.setVelocityY(0);
             fighter.setGrounded(true);
-            changed = true;
+            moved = true;
         }
 
-        return changed;
+        return moved;
     }
 
     public static void updateActiveFight(Fight fight) {

@@ -2,7 +2,6 @@ package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
-import Fight_club.Fight_Services.Domain.models.Enums.Direction;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import static Fight_club.Fight_Services.Application.Services.FightLoopService.updateActiveFight;
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
+
 @Service
 @RequiredArgsConstructor
 public class CombatService implements ProcessCombatInputUseCase {
@@ -28,26 +28,25 @@ public class CombatService implements ProcessCombatInputUseCase {
     private final RedissonClient redisson;
     private final VoiceChatNotifier voiceChatNotifier;
 
-
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
-        RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
+        Fight fight = FightLoopService.activeFights.get(fightId);
+        
+        if (fight == null) {
+            fight = combatRepository.findById(fightId)
+                    .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+            updateActiveFight(fight);
+        }
 
-        try {
-            if (lock.tryLock(2, 5, TimeUnit.SECONDS)) {
-                Fight fight = FightLoopService.activeFights.get(fightId);
+        Fighter attacker = fight.getFighterByUserId(userId);
+        Fighter defender = fight.getOpponentOf(userId);
 
-                if (fight == null) {
-                    fight = combatRepository.findById(fightId)
-                            .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
-                }
+        attacker.setCurrentAction(action);
 
-                Fighter attacker = fight.getFighterByUserId(userId);
-                Fighter defender = fight.getOpponentOf(userId);
-
-                attacker.executeAction(action);
-
-                if (isAttackAction(action)) {
+        if (isAttackAction(action)) {
+            RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
+            try {
+                if (lock.tryLock(0, 1, TimeUnit.SECONDS)) { 
                     Skill skillUsed = attacker.getSkillForAction(action);
 
                     if (checkCollision(attacker, defender)) {
@@ -59,29 +58,18 @@ public class CombatService implements ProcessCombatInputUseCase {
                             handleMatchEnd(fightId, attacker.getUserId());
                         }
 
-                        be.activate(
-                                fight.getHelpButton(),
-                                defender.getHealth().getCurrentHealth(),
-                                defender.getHealth().getMaxHealth(),
-                                defender.getUserId()
-                        );
-                        //fightWsBroker.fightStateUpdate(fightId, fight);
-
+                        be.activate(fight.getHelpButton(), 
+                                   defender.getHealth().getCurrentHealth(), 
+                                   defender.getHealth().getMaxHealth(), 
+                                   defender.getUserId());
                     }
-
+                    combatRepository.save(fight);
+                    fightWsBroker.fightStateUpdate(fightId, fight);
                 }
-                fightWsBroker.fightStateUpdate(fightId, fight);
-                combatRepository.save(fight);
-                updateActiveFight(fight);
-
-
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to acquire lock for fight: " + fightId, e);
-        } finally {
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                if (lock.isHeldByCurrentThread()) lock.unlock();
             }
         }
     }
@@ -92,20 +80,16 @@ public class CombatService implements ProcessCombatInputUseCase {
         }
     };
 
-
-
     private boolean isAttackAction(FighterAction action) {
         return action == FighterAction.BASIC_ATTACK || action == FighterAction.SPECIAL_ATTACK;
     }
 
     private boolean checkCollision(Fighter a, Fighter b) {
         return Math.abs(a.getPosX() - b.getPosX()) < 50 &&
-                Math.abs(a.getPosY() - b.getPosY()) < 20;
+               Math.abs(a.getPosY() - b.getPosY()) < 20;
     }
 
     private void handleMatchEnd(String fightId, String winnerId) {
-        System.out.println("Combate " + fightId + " finalizado. Ganador: " + winnerId);
         voiceChatNotifier.notifyFightFinished(fightId);
     }
-    
 }
