@@ -21,20 +21,19 @@ public class FightLoopService {
 
     public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
 
-    private static final int MOVE_SPEED = 8; 
+    private static final int MOVE_SPEED = 8;
     private static final int JUMP_SPEED = -16;
     private static final int GRAVITY = 1;
     private static final int GROUND_Y = 280;
 
-    @Scheduled(fixedRate = 16) 
+    @Scheduled(fixedRate = 16)
     public void tick() {
         for (Fight fight : activeFights.values()) {
             if (!fight.isActive()) continue;
-            
+
             boolean p1Changed = applyPhysics(fight.getPlayer1());
             boolean p2Changed = applyPhysics(fight.getPlayer2());
 
-        
             if (p1Changed || p2Changed) {
                 fightWsBroker.fightStateUpdate(fight.getId(), fight);
             }
