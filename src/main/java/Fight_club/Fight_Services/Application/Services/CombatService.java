@@ -46,7 +46,7 @@ public class CombatService implements ProcessCombatInputUseCase {
         if (isAttackAction(action)) {
             RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
             try {
-                if (lock.tryLock(0, 1, TimeUnit.SECONDS)) { 
+                if (lock.tryLock(2, 4, TimeUnit.SECONDS)) {
                     Skill skillUsed = attacker.getSkillForAction(action);
 
                     if (checkCollision(attacker, defender)) {
@@ -72,6 +72,8 @@ public class CombatService implements ProcessCombatInputUseCase {
                 if (lock.isHeldByCurrentThread()) lock.unlock();
             }
         }
+        updateActiveFight(fight);
+
     }
 
     ButtonEvent be = (btn, health, maxHe, userId) -> {
