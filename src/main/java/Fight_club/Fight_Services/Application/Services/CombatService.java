@@ -2,6 +2,8 @@ package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
+import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.FightEventProducer;
+import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightFinishedEvent;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,9 @@ import Fight_club.Fight_Services.Application.Ports.Input.ProcessCombatInputUseCa
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fighter;
 import Fight_club.Fight_Services.Domain.models.Fight;
+import Fight_club.Fight_Services.Domain.models.HelpButton;
 import Fight_club.Fight_Services.Domain.models.Skill;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
 import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Http.VoiceChatNotifier;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,7 @@ public class CombatService implements ProcessCombatInputUseCase {
     private final FightWsBroker fightWsBroker;
     private final RedissonClient redisson;
     private final VoiceChatNotifier voiceChatNotifier;
+    private final FightEventProducer fightEventProducer; 
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
@@ -55,7 +60,7 @@ public class CombatService implements ProcessCombatInputUseCase {
 
                         if (defender.isDefeated()) {
                             fight.finishFight();
-                            handleMatchEnd(fightId, attacker.getUserId());
+                            handleMatchEnd(fightId, fight, attacker, defender);
                         }
 
                         be.activate(fight.getHelpButton(), 
@@ -73,7 +78,51 @@ public class CombatService implements ProcessCombatInputUseCase {
             }
         }
         updateActiveFight(fight);
+    }
 
+    private void handleMatchEnd(String fightId, Fight fight,
+                                Fighter winner, Fighter loser) {
+        voiceChatNotifier.notifyFightFinished(fightId);
+
+        boolean draw = winner.getHealth().getCurrentHealth() <= 0
+                    && loser.getHealth().getCurrentHealth() <= 0;
+
+        String realWinnerId = resolveRealUserId(fight, winner.getUserId());
+        String realLoserId  = resolveRealUserId(fight, loser.getUserId());
+
+        FightFinishedEvent event;
+
+        if (draw) {
+            event = FightFinishedEvent.builder()
+                    .fightId(fightId)
+                    .winnerUserId(realWinnerId)
+                    .loserUserId(realLoserId)
+                    .result("DRAW")
+                    .winnerPointsChange(5)
+                    .loserPointsChange(5)
+                    .build();
+        } else {
+            event = FightFinishedEvent.builder()
+                    .fightId(fightId)
+                    .winnerUserId(realWinnerId)
+                    .loserUserId(realLoserId)
+                    .result("WIN_LOSE")
+                    .winnerPointsChange(28)
+                    .loserPointsChange(-12)
+                    .build();
+        }
+
+        fightEventProducer.publishFightFinished(event);
+    }
+
+    private String resolveRealUserId(Fight fight, String currentUserId) {
+        HelpButton btn = fight.getHelpButton();
+        if (btn != null
+                && btn.getStatus() == ButtonStatus.CLAIMED
+                && currentUserId.equals(btn.getClaimedByUserId())) {
+            return btn.getActivatedForUserId();
+        }
+        return currentUserId;
     }
 
     ButtonEvent be = (btn, health, maxHe, userId) -> {
@@ -89,9 +138,5 @@ public class CombatService implements ProcessCombatInputUseCase {
     private boolean checkCollision(Fighter a, Fighter b) {
         return Math.abs(a.getPosX() - b.getPosX()) < 50 &&
                Math.abs(a.getPosY() - b.getPosY()) < 20;
-    }
-
-    private void handleMatchEnd(String fightId, String winnerId) {
-        voiceChatNotifier.notifyFightFinished(fightId);
     }
 }
