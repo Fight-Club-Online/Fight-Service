@@ -43,6 +43,8 @@ public class CombatService implements ProcessCombatInputUseCase {
             updateActiveFight(fight);
         }
 
+        if (!fight.isActive()) return;
+
         Fighter attacker = fight.getFighterByUserId(userId);
         Fighter defender = fight.getOpponentOf(userId);
 
@@ -52,6 +54,11 @@ public class CombatService implements ProcessCombatInputUseCase {
             RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
             try {
                 if (lock.tryLock(2, 4, TimeUnit.SECONDS)) {
+                    
+                    Fight freshFight = combatRepository.findById(fightId)
+                    .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+                    if (!freshFight.isActive()) return;
+
                     Skill skillUsed = attacker.getSkillForAction(action);
 
                     if (checkCollision(attacker, defender)) {
@@ -90,6 +97,9 @@ public class CombatService implements ProcessCombatInputUseCase {
         String realWinnerId = resolveRealUserId(fight, winner.getUserId());
         String realLoserId  = resolveRealUserId(fight, loser.getUserId());
 
+        String realWinnerName = winner.getCharacterName();
+        String realLoserName  = loser.getCharacterName();
+
         FightFinishedEvent event;
 
         if (draw) {
@@ -97,6 +107,8 @@ public class CombatService implements ProcessCombatInputUseCase {
                     .fightId(fightId)
                     .winnerUserId(realWinnerId)
                     .loserUserId(realLoserId)
+                    .winnerUsername(realWinnerName)  
+                    .loserUsername(realLoserName)    
                     .result("DRAW")
                     .winnerPointsChange(5)
                     .loserPointsChange(5)
@@ -106,6 +118,8 @@ public class CombatService implements ProcessCombatInputUseCase {
                     .fightId(fightId)
                     .winnerUserId(realWinnerId)
                     .loserUserId(realLoserId)
+                    .winnerUsername(realWinnerName)   
+                    .loserUsername(realLoserName)     
                     .result("WIN_LOSE")
                     .winnerPointsChange(28)
                     .loserPointsChange(-12)
