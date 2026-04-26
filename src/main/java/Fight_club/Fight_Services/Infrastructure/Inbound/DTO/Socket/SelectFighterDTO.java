@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class SelectFighterDTO {
     private String userId;    // Coincide con 'odUserId'
     private String characterId;
+    private String username;
 }

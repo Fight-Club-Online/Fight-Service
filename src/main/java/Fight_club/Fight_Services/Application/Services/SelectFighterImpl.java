@@ -31,7 +31,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         fighter.setHasCharacter(true);
 
         fighter.setCharacterId(1L);
-        fighter.setCharacterName("Guerrero");
+        fighter.setCharacterName(figtherId != null && !figtherId.isBlank() ? figtherId : "Guerrero");
         fighter.setCharacterLevel(5);
         fighter.setCharacterATK(20);
         fighter.setCharacterDEF(10);

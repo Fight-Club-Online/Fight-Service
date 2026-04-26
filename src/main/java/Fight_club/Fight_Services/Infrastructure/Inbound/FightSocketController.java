@@ -42,7 +42,7 @@ public class FightSocketController {
 
     @MessageMapping("/fight/{fightId}/selectCharacter")
     public void selectFighter(@DestinationVariable String fightId, @Payload SelectFighterDTO sfDto) {
-        selectFighterUseCase.selectFigther(fightId,sfDto.getUserId(),sfDto.getCharacterId());
+        selectFighterUseCase.selectFigther(fightId, sfDto.getUserId(), sfDto.getUsername());
     }
 
 }
