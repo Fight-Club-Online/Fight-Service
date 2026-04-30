@@ -1,5 +1,7 @@
 package Fight_club.Fight_Services.Infrastructure.Inbound.DTO.Socket;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SelectFighterDTO {
-    private String userId;    // Coincide con 'odUserId'
+    @JsonProperty("userId")
+    private String userId;
+    
+    @JsonProperty("characterId")
     private String characterId;
+    
+    @JsonProperty("username")
     private String username;
 }
