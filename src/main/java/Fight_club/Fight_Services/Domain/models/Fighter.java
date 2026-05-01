@@ -18,7 +18,7 @@ public class Fighter {
 
 
 
-    private  long characterId;
+    private  String characterId;
     private  String characterName;
     private  int characterLevel;
     private  int characterATK;

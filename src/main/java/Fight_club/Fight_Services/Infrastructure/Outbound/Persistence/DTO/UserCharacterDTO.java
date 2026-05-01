@@ -1,6 +1,7 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Persistence.DTO;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.AllArgsConstructor;
@@ -10,16 +11,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(collection = "user_characters")
 public class UserCharacterDTO {
     
     @Id
-    private String id;
+    private String characterId;
     
     @Field("userId")
     private String userId;
-    
-    @Field("characterId")
-    private String characterId;
     
     @Field("characterName")
     private String characterName;

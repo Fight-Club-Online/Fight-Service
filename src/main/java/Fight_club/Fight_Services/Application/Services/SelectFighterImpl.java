@@ -58,7 +58,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
             log.info("  - characterATK: {}", userCharacter.getCharacterATK());
             log.info("  - characterDEF: {}", userCharacter.getCharacterDEF());
 
-            fighter.setCharacterId(Long.parseLong(userCharacter.getCharacterId()));
+            fighter.setCharacterId(userCharacter.getCharacterId());
             fighter.setCharacterName(userCharacter.getCharacterName());
             fighter.setCharacterLevel(userCharacter.getCharacterLevel());
             fighter.setCharacterATK(userCharacter.getCharacterATK());
@@ -68,13 +68,13 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         } else {
             log.warn("✗ UserCharacter NO encontrado en BD - usando valores por defecto");
             // Fallback a valores hardcodeados si no se encuentra el personaje
-            fighter.setCharacterId(1L);
+            fighter.setCharacterId(usercharacterid);
             fighter.setCharacterName(usercharacterid != null && !usercharacterid.isBlank() ? usercharacterid : "Guerrero");
             fighter.setCharacterLevel(5);
             fighter.setCharacterATK(20);
             fighter.setCharacterDEF(10);
 
-            log.info("  - characterId (default): 1");
+            log.info("  - characterId (default): {}", fighter.getCharacterId());
             log.info("  - characterName (default): {}", fighter.getCharacterName());
             log.info("  - characterLevel (default): 5");
             log.info("  - characterATK (default): 20");

@@ -44,10 +44,10 @@ public class UserCharacterMapper {
         Direction direction = isPlayerOne ? Direction.RIGHT : Direction.LEFT;
 
         return Fighter.builder()
-                .id(userCharacter.getId())
+            .id(userCharacter.getCharacterId())
                 .userId(userCharacter.getUserId())
                 .hasCharacter(true)
-                .characterId(Long.parseLong(userCharacter.getCharacterId()))
+                .characterId(userCharacter.getCharacterId())
                 .characterName(userCharacter.getCharacterName())
                 .characterLevel(userCharacter.getCharacterLevel())
                 .characterATK(userCharacter.getCharacterATK())
@@ -76,7 +76,7 @@ public class UserCharacterMapper {
                 .id(null)
                 .userId(userId)
                 .hasCharacter(false)
-                .characterId(0L)
+                .characterId(null)
                 .characterName("No Character")
                 .characterLevel(0)
                 .characterATK(0)
