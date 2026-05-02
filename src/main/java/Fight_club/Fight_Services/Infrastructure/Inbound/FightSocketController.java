@@ -51,7 +51,7 @@ public class FightSocketController {
                 ? sfDto.getCharacterId() 
                 : sfDto.getUsername();
         
-        selectFighterUseCase.selectFigther(fightId, sfDto.getUserId(), characterIdToUse);
+        selectFighterUseCase.selectFigther(fightId, sfDto.getUserId(), characterIdToUse, sfDto.getUsername());
     }
 
 }

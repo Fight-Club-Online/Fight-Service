@@ -23,6 +23,7 @@ public class Fighter {
     private  int characterLevel;
     private  int characterATK;
     private  int characterDEF;
+    private String username;
 
     private Health health;
     private List<Skill> skills;

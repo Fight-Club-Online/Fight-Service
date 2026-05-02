@@ -97,8 +97,8 @@ public class CombatService implements ProcessCombatInputUseCase {
         String realWinnerId = resolveRealUserId(fight, winner.getUserId());
         String realLoserId  = resolveRealUserId(fight, loser.getUserId());
 
-        String realWinnerName = winner.getCharacterName();
-        String realLoserName  = loser.getCharacterName();
+        String realWinnerName = winner.getUsername() != null ? winner.getUsername() : winner.getUserId();
+        String realLoserName  = loser.getUsername()  != null ? loser.getUsername()  : loser.getUserId();
 
         FightFinishedEvent event;
 

@@ -31,7 +31,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
     private final GetUserCharacterByUserIdAndCharacterIdImp getUserCharacterService;
 
     @Override
-    public void selectFigther(String fightId, String userId, String usercharacterid) {
+    public void selectFigther(String fightId, String userId, String usercharacterid, String username) {
         log.info("=== INICIANDO selectFigther ===");
         log.info("fightId: {}, userId: {}, usercharacterid: {}", fightId, userId, usercharacterid);
 
@@ -130,6 +130,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         fighter.setCurrentAction(FighterAction.IDLE);
         fighter.setBlocking(false);
         fighter.setCurrentStunFrames(0);
+        fighter.setUsername(username != null && !username.isBlank() ? username : userId);
         log.info("Estado inicial: IDLE, no bloqueando, stun frames = 0");
 
         combatRepository.save(fight);
