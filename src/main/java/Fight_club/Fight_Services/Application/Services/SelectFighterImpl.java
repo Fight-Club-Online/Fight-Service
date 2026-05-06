@@ -21,6 +21,7 @@ import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocke
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -89,7 +90,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         skills.add(
                 new Skill(
                         FighterAction.BASIC_ATTACK,
-                        75,
+                        fighter.getCharacterATK(),
                         60,
                         5,
                         10,
