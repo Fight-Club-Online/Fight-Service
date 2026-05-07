@@ -4,6 +4,7 @@ import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.FightEventProducer;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightFinishedEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -25,13 +26,15 @@ import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CombatService implements ProcessCombatInputUseCase {
 
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
     private final RedissonClient redisson;
     private final VoiceChatNotifier voiceChatNotifier;
-    private final FightEventProducer fightEventProducer; 
+    private final FightEventProducer fightEventProducer;
+
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
@@ -62,6 +65,7 @@ public class CombatService implements ProcessCombatInputUseCase {
                         defender.receiveAttack(skillUsed);
                         defender.setCurrentAction(FighterAction.HURT);
 
+                        log.info("Attacker {} hit defender {}", attacker.getHealth().getCurrentHealth(), defender.getHealth().getCurrentHealth());
                         if (defender.isDefeated()) {
                             fight.finishFight();
                             handleMatchEnd(fightId, fight, attacker, defender);
@@ -71,6 +75,10 @@ public class CombatService implements ProcessCombatInputUseCase {
                                    defender.getHealth().getCurrentHealth(), 
                                    defender.getHealth().getMaxHealth(), 
                                    defender.getUserId());
+                    }
+
+                    if(fight.getHelpButton().getStatus() == ButtonStatus.ACTIVE){
+                        fightWsBroker.updateHelpButton(fightId, fight.getHelpButton());
                     }
                     combatRepository.save(fight);
                     fightWsBroker.fightStateUpdate(fightId, fight);
@@ -83,6 +91,8 @@ public class CombatService implements ProcessCombatInputUseCase {
         }
         combatRepository.save(fight);
     }
+
+
 
     private void handleMatchEnd(String fightId, Fight fight,
                                 Fighter winner, Fighter loser) {
@@ -147,7 +157,19 @@ public class CombatService implements ProcessCombatInputUseCase {
     }
 
     private boolean checkCollision(Fighter a, Fighter b) {
-        return Math.abs(a.getPosX() - b.getPosX()) < 50 &&
-               Math.abs(a.getPosY() - b.getPosY()) < 20;
+        var fALeft  = a.getPosX() +a.getHitbox().getOffsetX();
+        var fARight = fALeft + a.getHitbox().getWidth();
+        var fTop = a.getPosY() + a.getHitbox().getOffsetY();
+        var fBottom = fTop + a.getHitbox().getHeight();
+
+        var fBLeft  = b.getPosX() +b.getHitbox().getOffsetX();
+        var fBRight = fBLeft  + b.getHitbox().getWidth();
+        var fBTop = b.getPosY() + b.getHitbox().getOffsetY();
+        var fBBottom = fBTop + b.getHitbox().getHeight();
+
+        log.info("Checking collision:");
+        log.info("Fighter A - Right: {}, Left: {}, Top: {}, Bottom: {}", fARight, fALeft, fTop, fBottom);
+        log.info("Fighter B - Right: {}, Left: {}, Top: {}, Bottom: {}", fBRight, fBLeft, fBTop, fBBottom);
+        return fALeft < fBRight && fARight > fBLeft && fTop < fBBottom && fBottom > fBTop;
     }
 }
