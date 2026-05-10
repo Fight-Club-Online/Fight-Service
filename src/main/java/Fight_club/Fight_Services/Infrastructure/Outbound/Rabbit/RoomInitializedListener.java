@@ -65,7 +65,7 @@ public class RoomInitializedListener {
                  .spectators(specs)
                  .player1(figthers.get(0))
                  .player2(figthers.get(1))
-                 .isActive(false)
+                 .active(false)
                  .helpButton(helpButton)
                  .build();
         combatRepository.save(f);

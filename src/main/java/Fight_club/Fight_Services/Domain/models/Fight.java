@@ -14,7 +14,7 @@ public class Fight {
     private  String id;
     private  Fighter player1;
     private  Fighter player2;
-    private boolean isActive;
+    private boolean active;
     private  HelpButton helpButton;
     private  List<Player> spectators;
 
@@ -43,7 +43,7 @@ public class Fight {
         spectators.remove(player);
     }
     public void finishFight() {
-        this.isActive = false;
+        this.active = false;
     }
 
 
