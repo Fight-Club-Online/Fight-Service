@@ -134,6 +134,7 @@ public class SelectFighterImpl implements SelectFighterUseCase {
         fighter.setUsername(username != null && !username.isBlank() ? username : userId);
         log.info("Estado inicial: IDLE, no bloqueando, stun frames = 0");
 
+
         combatRepository.save(fight);
         log.info("✓ Fight guardado en repositorio");
 

@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FightLoopService {
 
-    private final CombatRepository combatRepository; // Solo lo usaremos para persistencia final
+    private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
 
     public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();

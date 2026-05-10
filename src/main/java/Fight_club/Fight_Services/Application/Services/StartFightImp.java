@@ -1,6 +1,7 @@
 package Fight_club.Fight_Services.Application.Services;
 
 import Fight_club.Fight_Services.Application.Ports.Input.StartFightUseCase;
+import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+import static Fight_club.Fight_Services.Application.Services.FightLoopService.updateActiveFight;
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
 
 @Service
@@ -24,7 +26,7 @@ public class StartFightImp implements StartFightUseCase {
             Fight fight = combatRepository.findById(fightId)
                     .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
-            if(fight.isActive()) return fight;
+            if(fight.isActive()) return fight;  // Lombok genera isActive() automáticamente
 
             if(!fight.getPlayer1().getHealth().isAlive() || !fight.getPlayer2().getHealth().isAlive()){
                 throw new RuntimeException("El usuario no esta vivo");
@@ -42,6 +44,5 @@ public class StartFightImp implements StartFightUseCase {
                 lock.unlock();
             }
         }
-
     }
 }
