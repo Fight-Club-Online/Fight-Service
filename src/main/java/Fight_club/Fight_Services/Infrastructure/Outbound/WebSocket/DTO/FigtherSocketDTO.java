@@ -6,7 +6,7 @@ import Fight_club.Fight_Services.Domain.models.Health;
 
 public record FigtherSocketDTO(
         String userId,
-        Health healt,
+        Health health,
         int posX,
         int posY,
         boolean isGrounded,
