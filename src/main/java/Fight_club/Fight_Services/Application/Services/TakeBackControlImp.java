@@ -53,7 +53,7 @@ public class TakeBackControlImp implements TakeBackControlUseCase {
                 helpButton.deactivate();
                 combatRepository.save(fight);
                 fightWebSocketUpdater.changeFighters(fightId, fight);
-                updateActiveFight(fight);
+                combatRepository.save(fight);
             }
 
         }catch (InterruptedException e){

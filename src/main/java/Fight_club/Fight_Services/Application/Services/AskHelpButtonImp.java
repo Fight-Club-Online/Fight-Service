@@ -39,7 +39,7 @@ public class AskHelpButtonImp implements AskHelpButtonUseCase {
                 helpButton.setVisible(true);
                 combatRepository.save(fight);
                 fightWsBroker.updateHelpButton(fightId, helpButton);
-                updateActiveFight(fight);
+                combatRepository.save(fight);
 
             }
 

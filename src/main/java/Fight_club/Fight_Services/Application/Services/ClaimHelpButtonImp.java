@@ -59,7 +59,7 @@ public class ClaimHelpButtonImp implements ClaimHelpButtonUseCase {
 
                 combatRepository.save(fight);
                 fightWebSocketUpdater.changeFighters(fightId, fight);
-                updateActiveFight(fight);
+                combatRepository.save(fight);
 
             }
 

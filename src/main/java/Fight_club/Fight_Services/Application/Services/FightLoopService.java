@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FightLoopService {
 
-    private final CombatRepository combatRepository; // Solo lo usaremos para persistencia final
+    private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
 
     public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
@@ -29,7 +29,8 @@ public class FightLoopService {
 
     @Scheduled(fixedRate = 16)
     public void tick() {
-        for (Fight fight : activeFights.values()) {
+
+        for (Fight fight : combatRepository.findAll()) {
             if (!fight.isActive()) continue;
 
             boolean p1Changed = applyPhysics(fight.getPlayer1());
@@ -83,6 +84,7 @@ public class FightLoopService {
 
         return moved;
     }
+
 
     public static void updateActiveFight(Fight fight) {
         activeFights.put(fight.getId(), fight);

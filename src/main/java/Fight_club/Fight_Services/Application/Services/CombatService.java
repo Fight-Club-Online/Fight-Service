@@ -35,13 +35,10 @@ public class CombatService implements ProcessCombatInputUseCase {
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
-        Fight fight = FightLoopService.activeFights.get(fightId);
-        
-        if (fight == null) {
-            fight = combatRepository.findById(fightId)
-                    .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
-            updateActiveFight(fight);
-        }
+        Fight fight = combatRepository.findById(fightId)
+                .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
+        combatRepository.save(fight);
+
 
         if (!fight.isActive()) return;
 
@@ -84,7 +81,7 @@ public class CombatService implements ProcessCombatInputUseCase {
                 if (lock.isHeldByCurrentThread()) lock.unlock();
             }
         }
-        updateActiveFight(fight);
+        combatRepository.save(fight);
     }
 
     private void handleMatchEnd(String fightId, Fight fight,
