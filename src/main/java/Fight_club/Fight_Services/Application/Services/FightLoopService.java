@@ -37,7 +37,7 @@ public class FightLoopService {
             String fightId = cachedFight.getId();
             RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
             try {
-                if (!lock.tryLock(1, 4, TimeUnit.SECONDS)) continue;
+                if (!lock.tryLock(0, 1, TimeUnit.SECONDS)) continue;
 
                 Fight fight = combatRepository.findById(fightId).orElse(null);
                 if (fight == null || !fight.isActive()) continue;
