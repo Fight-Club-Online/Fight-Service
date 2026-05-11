@@ -1,7 +1,9 @@
 package Fight_club.Fight_Services.Application.Services;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +15,15 @@ import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.Fighter;
 import lombok.RequiredArgsConstructor;
 
+import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
+
 @Service
 @RequiredArgsConstructor
 public class FightLoopService {
 
     private final CombatRepository combatRepository;
     private final FightWsBroker fightWsBroker;
-
-    public static final ConcurrentHashMap<String, Fight> activeFights = new ConcurrentHashMap<>();
+    private final RedissonClient redisson;
 
     private static final int MOVE_SPEED = 8;
     private static final int JUMP_SPEED = -16;
@@ -30,14 +33,29 @@ public class FightLoopService {
     @Scheduled(fixedRate = 16)
     public void tick() {
 
-        for (Fight fight : combatRepository.findAll()) {
-            if (!fight.isActive()) continue;
+        for (Fight cachedFight : combatRepository.findAll()) {
+            String fightId = cachedFight.getId();
+            RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
+            try {
+                if (!lock.tryLock(1, 4, TimeUnit.SECONDS)) continue;
 
-            boolean p1Changed = applyPhysics(fight.getPlayer1());
-            boolean p2Changed = applyPhysics(fight.getPlayer2());
+                Fight fight = combatRepository.findById(fightId).orElse(null);
+                if (fight == null || !fight.isActive()) continue;
 
-            if (p1Changed || p2Changed) {
-                fightWsBroker.fightStateUpdate(fight.getId(), fight);
+                boolean p1Changed = applyPhysics(fight.getPlayer1());
+                boolean p2Changed = applyPhysics(fight.getPlayer2());
+
+                if (p1Changed || p2Changed) {
+                    combatRepository.save(fight);
+                    fightWsBroker.fightStateUpdate(fightId, fight);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            } finally {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
             }
         }
     }
@@ -86,7 +104,4 @@ public class FightLoopService {
     }
 
 
-    public static void updateActiveFight(Fight fight) {
-        activeFights.put(fight.getId(), fight);
-    }
 }

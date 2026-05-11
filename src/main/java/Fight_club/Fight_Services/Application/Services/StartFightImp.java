@@ -9,7 +9,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import static Fight_club.Fight_Services.Application.Services.FightLoopService.updateActiveFight;
 import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
 
 @Service
