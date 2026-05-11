@@ -17,7 +17,7 @@ public class SchedulerConfig {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         int poolSize = configuredPoolSize > 0
                 ? configuredPoolSize
-                : Math.max(2, Runtime.getRuntime().availableProcessors());
+                : Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
         scheduler.setPoolSize(poolSize);
         scheduler.setThreadNamePrefix("fight-tick-");
         scheduler.initialize();
