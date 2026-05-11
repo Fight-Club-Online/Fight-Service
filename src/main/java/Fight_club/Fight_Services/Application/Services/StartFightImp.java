@@ -22,6 +22,9 @@ public class StartFightImp implements StartFightUseCase {
     public Fight startFight(String fightId) {
         RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
         try{
+            if (!lock.tryLock(2, 4, java.util.concurrent.TimeUnit.SECONDS)) {
+                throw new RuntimeException("Failed to acquire lock for fight: " + fightId);
+            }
             Fight fight = combatRepository.findById(fightId)
                     .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
 
@@ -32,12 +35,15 @@ public class StartFightImp implements StartFightUseCase {
             }
 
             fight.setActive(true);
+            fight.setHasPendingUpdate(true);
             combatRepository.save(fight);
             return fight;
 
-        }catch (Exception e){
+        }catch (InterruptedException e){
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to acquire lock for fight: " + fightId, e);
+        }catch (Exception e){
+            throw new RuntimeException("Failed to start fight: " + fightId, e);
         }finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();

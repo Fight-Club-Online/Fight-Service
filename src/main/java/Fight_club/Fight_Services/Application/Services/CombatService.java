@@ -37,58 +37,52 @@ public class CombatService implements ProcessCombatInputUseCase {
 
     @Override
     public void handlePlayerInput(String fightId, String userId, FighterAction action) {
-        Fight fight = combatRepository.findById(fightId)
-                .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
-        combatRepository.save(fight);
+        RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
+        try {
+            if (!lock.tryLock(2, 4, TimeUnit.SECONDS)) return;
 
-
-        if (!fight.isActive()) return;
-
-        Fighter attacker = fight.getFighterByUserId(userId);
-        Fighter defender = fight.getOpponentOf(userId);
-
-        attacker.setCurrentAction(action);
-
-        if (isAttackAction(action)) {
-            RLock lock = redisson.getLock(FIGHT_LOCK + fightId);
-            try {
-                if (lock.tryLock(2, 4, TimeUnit.SECONDS)) {
-                    
-                    Fight freshFight = combatRepository.findById(fightId)
+            Fight fight = combatRepository.findById(fightId)
                     .orElseThrow(() -> new RuntimeException("Fight not found: " + fightId));
-                    if (!freshFight.isActive()) return;
+            if (!fight.isActive()) return;
 
-                    Skill skillUsed = attacker.getSkillForAction(action);
+            Fighter attacker = fight.getFighterByUserId(userId);
+            Fighter defender = fight.getOpponentOf(userId);
+            attacker.setCurrentAction(action);
+            fight.setHasPendingUpdate(true);
 
-                    if (checkCollision(attacker, defender)) {
-                        defender.receiveAttack(skillUsed);
-                        defender.setCurrentAction(FighterAction.HURT);
+            if (isAttackAction(action)) {
+                Skill skillUsed = attacker.getSkillForAction(action);
 
-                        log.info("Attacker {} hit defender {}", attacker.getHealth().getCurrentHealth(), defender.getHealth().getCurrentHealth());
-                        if (defender.isDefeated()) {
-                            fight.finishFight();
-                            handleMatchEnd(fightId, fight, attacker, defender);
-                        }
+                if (checkCollision(attacker, defender)) {
+                    defender.receiveAttack(skillUsed);
+                    defender.setCurrentAction(FighterAction.HURT);
 
-                        be.activate(fight.getHelpButton(), 
-                                   defender.getHealth().getCurrentHealth(), 
-                                   defender.getHealth().getMaxHealth(), 
-                                   defender.getUserId());
+                    log.info("Attacker {} hit defender {}", attacker.getHealth().getCurrentHealth(), defender.getHealth().getCurrentHealth());
+                    if (defender.isDefeated()) {
+                        fight.finishFight();
+                        fight.setHasPendingUpdate(false);
+                        handleMatchEnd(fightId, fight, attacker, defender);
                     }
 
-                    if(fight.getHelpButton().getStatus() == ButtonStatus.ACTIVE){
-                        fightWsBroker.updateHelpButton(fightId, fight.getHelpButton());
-                    }
-                    combatRepository.save(fight);
-                    fightWsBroker.fightStateUpdate(fightId, fight);
+                    be.activate(fight.getHelpButton(),
+                            defender.getHealth().getCurrentHealth(),
+                            defender.getHealth().getMaxHealth(),
+                            defender.getUserId());
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } finally {
-                if (lock.isHeldByCurrentThread()) lock.unlock();
+
+                if (fight.getHelpButton().getStatus() == ButtonStatus.ACTIVE) {
+                    fightWsBroker.updateHelpButton(fightId, fight.getHelpButton());
+                }
+                combatRepository.save(fight);
+                fightWsBroker.fightStateUpdate(fightId, fight);
+                return;
             }
+            combatRepository.save(fight);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (lock.isHeldByCurrentThread()) lock.unlock();
         }
-        combatRepository.save(fight);
     }
 
 

@@ -9,4 +9,5 @@ public interface CombatRepository {
     void save(Fight fight); 
     void delete(String fightId);
     List<Fight> findAll();
+    List<String> findActiveFightIdsForCurrentSlot();
 }
