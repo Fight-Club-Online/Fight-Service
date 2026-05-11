@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Repository
@@ -35,6 +37,14 @@ public class RedissonCache implements CombatRepository {
     public Optional<Fight> findById(String fightId) {
         RMapCache<String, Fight> fightsMap = redisson.getMapCache(CACHE_NAME);
         return Optional.ofNullable(fightsMap.get(fightId));
+    }
+
+    @Override
+    public List<Fight> findByIds(List<String> fightIds) {
+        if (fightIds == null || fightIds.isEmpty()) return List.of();
+        RMapCache<String, Fight> fightsMap = redisson.getMapCache(CACHE_NAME);
+        Map<String, Fight> found = fightsMap.getAll(Set.copyOf(fightIds));
+        return found.values().stream().filter(java.util.Objects::nonNull).toList();
     }
 
     @Override
