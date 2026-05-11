@@ -49,8 +49,10 @@ public class CombatService implements ProcessCombatInputUseCase {
             Fighter defender = fight.getOpponentOf(userId);
             attacker.setCurrentAction(action);
             fight.setHasPendingUpdate(true);
+            boolean shouldBroadcastFightState = false;
 
             if (isAttackAction(action)) {
+                shouldBroadcastFightState = true;
                 Skill skillUsed = attacker.getSkillForAction(action);
 
                 if (checkCollision(attacker, defender)) {
@@ -73,11 +75,11 @@ public class CombatService implements ProcessCombatInputUseCase {
                 if (fight.getHelpButton().getStatus() == ButtonStatus.ACTIVE) {
                     fightWsBroker.updateHelpButton(fightId, fight.getHelpButton());
                 }
-                combatRepository.save(fight);
-                fightWsBroker.fightStateUpdate(fightId, fight);
-                return;
             }
             combatRepository.save(fight);
+            if (shouldBroadcastFightState) {
+                fightWsBroker.fightStateUpdate(fightId, fight);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
