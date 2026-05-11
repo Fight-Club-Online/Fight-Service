@@ -15,6 +15,7 @@ public class Fight {
     private  Fighter player1;
     private  Fighter player2;
     private boolean active;
+    private boolean hasPendingUpdate;
     private  HelpButton helpButton;
     private  List<Player> spectators;
 
