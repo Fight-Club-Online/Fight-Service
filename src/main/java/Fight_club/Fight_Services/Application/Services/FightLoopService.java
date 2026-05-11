@@ -25,18 +25,17 @@ public class FightLoopService {
 
     @Scheduled(fixedRate = 16)
     public void tick() {
-
-        for (String fightId : combatRepository.findActiveFightIdsForCurrentSlot()) {
-            Fight fight = combatRepository.findById(fightId).orElse(null);
+        for (Fight fight : combatRepository.findByIds(combatRepository.findActiveFightIdsForCurrentSlot())) {
             if (fight == null || !fight.isActive() || !fight.isHasPendingUpdate()) continue;
+            String fightId = fight.getId();
 
             boolean p1Changed = applyPhysics(fight.getPlayer1());
             boolean p2Changed = applyPhysics(fight.getPlayer2());
             boolean shouldKeepPending = shouldKeepPending(fight.getPlayer1()) || shouldKeepPending(fight.getPlayer2());
-            boolean pendingChanged = fight.isHasPendingUpdate() != shouldKeepPending;
+            boolean pendingFlagChanged = fight.isHasPendingUpdate() != shouldKeepPending;
             fight.setHasPendingUpdate(shouldKeepPending);
 
-            if (p1Changed || p2Changed || pendingChanged) {
+            if (p1Changed || p2Changed || pendingFlagChanged) {
                 combatRepository.save(fight);
                 if (p1Changed || p2Changed) {
                     fightWsBroker.fightStateUpdate(fightId, fight);
