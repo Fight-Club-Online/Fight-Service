@@ -25,12 +25,17 @@ public class RabbitConfig {
 
     public static final String FIGHT_EXCHANGE = "fight.events";
     public static final String FIGHT_FINISHED_ROUTING_KEY = "fight.finished";
-    
+    public static final String FIGHT_COMMAND_EXCHANGE = "fight.commands";
+    public static final String FIGHT_COMMAND_QUEUE = "fightCommandQueue";
+    private static final String FIGHT_COMMAND_QUEUE_PREFIX = "fight.command.slot.";
+    private static final String FIGHT_COMMAND_QUEUE_SUFFIX = ".queue";
+    private static final String FIGHT_COMMAND_ROUTING_PREFIX = "fight.command.slot.";
 
     // Exchanges
     @Bean public DirectExchange userExchange() { return new DirectExchange(EXCHANGE_USER); }
     @Bean public TopicExchange roomExchange() { return new TopicExchange(EXCHANGE_ROOM); }
     @Bean public TopicExchange fightExchange() { return new TopicExchange(FIGHT_EXCHANGE); }
+    @Bean public TopicExchange fightCommandExchange() { return new TopicExchange(FIGHT_COMMAND_EXCHANGE); }
 
 
     @Bean
@@ -80,6 +85,22 @@ public class RabbitConfig {
                 .with(ROUTING_KEY_ROOM);
     }
 
+    @Bean(name = FIGHT_COMMAND_QUEUE)
+    public Queue fightCommandQueue(@org.springframework.beans.factory.annotation.Value("${fight.partition.current-slot:0}") int currentSlot) {
+        return new Queue(fightCommandQueueName(currentSlot), true);
+    }
+
+    @Bean
+    public Binding fightCommandBinding(
+            @Qualifier(FIGHT_COMMAND_QUEUE) Queue fightCommandQueue,
+            @Qualifier("fightCommandExchange") TopicExchange fightCommandExchange,
+            @org.springframework.beans.factory.annotation.Value("${fight.partition.current-slot:0}") int currentSlot) {
+        return BindingBuilder
+                .bind(fightCommandQueue)
+                .to(fightCommandExchange)
+                .with(fightCommandRoutingKey(currentSlot));
+    }
+
     // RabbitTemplate 
 
     @Bean
@@ -92,5 +113,13 @@ public class RabbitConfig {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jsonMessageConverter());
         return template;
+    }
+
+    public static String fightCommandRoutingKey(int slot) {
+        return FIGHT_COMMAND_ROUTING_PREFIX + slot;
+    }
+
+    public static String fightCommandQueueName(int slot) {
+        return FIGHT_COMMAND_QUEUE_PREFIX + slot + FIGHT_COMMAND_QUEUE_SUFFIX;
     }
 }
