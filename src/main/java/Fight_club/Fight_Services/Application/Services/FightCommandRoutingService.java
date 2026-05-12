@@ -83,7 +83,6 @@ public class FightCommandRoutingService {
                     command.getCharacterId(),
                     command.getUsername()
             );
-            default -> log.warn("Unsupported fight command type received: {}", command.getType());
         }
     }
 

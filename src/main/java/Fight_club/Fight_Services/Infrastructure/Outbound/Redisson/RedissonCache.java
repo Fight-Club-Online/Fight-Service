@@ -35,6 +35,7 @@ public class RedissonCache implements CombatRepository {
     private final Map<String, Fight> localOwnedFights = new ConcurrentHashMap<>();
     private final Set<String> localActiveFightIds = ConcurrentHashMap.newKeySet();
     private final Set<String> dirtyOwnedFightIds = ConcurrentHashMap.newKeySet();
+    private final Object dirtyOwnedLock = new Object();
 
     @Override
     public Optional<Fight> findById(String fightId) {
@@ -63,8 +64,10 @@ public class RedissonCache implements CombatRepository {
     @Override
     public void save(Fight fight) {
         if (fightOwnershipService.isOwnedByCurrentNode(fight.getId())) {
-            cacheOwnedFight(fight);
-            dirtyOwnedFightIds.add(fight.getId());
+            synchronized (dirtyOwnedLock) {
+                cacheOwnedFight(fight);
+                dirtyOwnedFightIds.add(fight.getId());
+            }
         } else {
             writeThroughRemote(fight);
         }
@@ -106,22 +109,24 @@ public class RedissonCache implements CombatRepository {
 
     @Scheduled(fixedDelayString = "${fight.snapshot.fixed-delay-ms:250}")
     public void flushOwnedSnapshots() {
-        if (dirtyOwnedFightIds.isEmpty()) return;
-        Set<String> ids = new HashSet<>(dirtyOwnedFightIds);
-        for (String fightId : ids) {
-            if (!dirtyOwnedFightIds.remove(fightId)) {
-                continue;
-            }
-            try {
-                Fight fight = localOwnedFights.get(fightId);
-                if (fight != null) {
-                    writeThroughRemote(fight);
-                } else {
-                    removeRemote(fightId);
+        synchronized (dirtyOwnedLock) {
+            if (dirtyOwnedFightIds.isEmpty()) return;
+            Set<String> ids = new HashSet<>(dirtyOwnedFightIds);
+            for (String fightId : ids) {
+                if (!dirtyOwnedFightIds.remove(fightId)) {
+                    continue;
                 }
-            } catch (Exception ex) {
-                dirtyOwnedFightIds.add(fightId);
-                log.error("Failed to flush snapshot for fight {}", fightId, ex);
+                try {
+                    Fight fight = localOwnedFights.get(fightId);
+                    if (fight != null) {
+                        writeThroughRemote(fight);
+                    } else {
+                        removeRemote(fightId);
+                    }
+                } catch (Exception ex) {
+                    dirtyOwnedFightIds.add(fightId);
+                    log.error("Failed to flush snapshot for fight {}", fightId, ex);
+                }
             }
         }
     }
@@ -154,5 +159,7 @@ public class RedissonCache implements CombatRepository {
         redisson.getSet(slotKey(fightOwnershipService.slotForFight(fightId))).remove(fightId);
     }
 
-    private String slotKey(int slot) { return SLOT_KEY_PREFIX + slot; }
+    private String slotKey(int slot) {
+        return SLOT_KEY_PREFIX + slot;
+    }
 }
