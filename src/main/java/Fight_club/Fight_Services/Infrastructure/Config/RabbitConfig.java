@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -86,7 +87,7 @@ public class RabbitConfig {
     }
 
     @Bean(name = FIGHT_COMMAND_QUEUE)
-    public Queue fightCommandQueue(@org.springframework.beans.factory.annotation.Value("${fight.partition.current-slot:0}") int currentSlot) {
+    public Queue fightCommandQueue(@Value("${fight.partition.current-slot:0}") int currentSlot) {
         return new Queue(fightCommandQueueName(currentSlot), true);
     }
 
@@ -94,7 +95,7 @@ public class RabbitConfig {
     public Binding fightCommandBinding(
             @Qualifier(FIGHT_COMMAND_QUEUE) Queue fightCommandQueue,
             @Qualifier("fightCommandExchange") TopicExchange fightCommandExchange,
-            @org.springframework.beans.factory.annotation.Value("${fight.partition.current-slot:0}") int currentSlot) {
+            @Value("${fight.partition.current-slot:0}") int currentSlot) {
         return BindingBuilder
                 .bind(fightCommandQueue)
                 .to(fightCommandExchange)
