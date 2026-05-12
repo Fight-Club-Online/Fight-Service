@@ -1,6 +1,6 @@
 package Fight_club.Fight_Services.Infrastructure.Inbound;
 
-import Fight_club.Fight_Services.Application.Services.FightCommandRoutingService;
+import Fight_club.Fight_Services.Application.Services.Fight.FightCommandRoutingService;
 import Fight_club.Fight_Services.Infrastructure.Inbound.DTO.Socket.PlayerInputDto;
 import Fight_club.Fight_Services.Infrastructure.Inbound.DTO.Socket.SelectFighterDTO;
 import lombok.AllArgsConstructor;

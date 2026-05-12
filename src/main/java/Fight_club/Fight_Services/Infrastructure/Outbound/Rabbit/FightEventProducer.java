@@ -1,6 +1,6 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit;
 
-import Fight_club.Fight_Services.Application.Services.FightHistoryService;
+import Fight_club.Fight_Services.Application.Services.Fight.FightHistoryService;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightFinishedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

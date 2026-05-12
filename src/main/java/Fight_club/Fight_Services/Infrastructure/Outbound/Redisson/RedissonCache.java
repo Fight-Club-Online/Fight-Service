@@ -1,6 +1,6 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Redisson;
 
-import Fight_club.Fight_Services.Application.Services.FightOwnershipService;
+import Fight_club.Fight_Services.Application.Services.Fight.FightOwnershipService;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import lombok.RequiredArgsConstructor;

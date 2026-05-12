@@ -2,7 +2,7 @@ package Fight_club.Fight_Services.Infrastructure.Inbound;
 
 import Fight_club.Fight_Services.Application.Ports.Input.GetFightUseCase;
 import Fight_club.Fight_Services.Application.Ports.Input.StartFightUseCase;
-import Fight_club.Fight_Services.Application.Services.FightHistoryService;
+import Fight_club.Fight_Services.Application.Services.Fight.FightHistoryService;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import Fight_club.Fight_Services.Domain.models.FightRecord;
 import lombok.AllArgsConstructor;

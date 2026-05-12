@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Action;
 
 import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Services.ButtonEvent;
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
 
-import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
+import static Fight_club.Fight_Services.Application.Services.Fight.LocksStrings.FIGHT_LOCK;
 
 @Service
 @RequiredArgsConstructor

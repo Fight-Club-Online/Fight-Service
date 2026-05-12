@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Fight;
 
 import Fight_club.Fight_Services.Application.Ports.Input.AskHelpButtonUseCase;
 import Fight_club.Fight_Services.Application.Ports.Input.ClaimHelpButtonUseCase;

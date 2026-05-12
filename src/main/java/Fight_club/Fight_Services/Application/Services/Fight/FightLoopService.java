@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Fight;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

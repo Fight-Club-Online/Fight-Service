@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Fight;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,22 +13,19 @@ public class FightOwnershipService {
     private int currentSlot;
 
     public int slotForFight(String fightId) {
-        return Math.floorMod(fightId.hashCode(), resolveTotalSlots());
+        return Math.floorMod(fightId.hashCode(), totalSlots());
     }
 
     public boolean isOwnedByCurrentNode(String fightId) {
-        return slotForFight(fightId) == resolveCurrentSlot();
+        return slotForFight(fightId) == currentSlot();
     }
 
     public int currentSlot() {
-        return resolveCurrentSlot();
+
+        return Math.floorMod(currentSlot, totalSlots());
     }
 
-    private int resolveCurrentSlot() {
-        return Math.floorMod(currentSlot, resolveTotalSlots());
-    }
-
-    private int resolveTotalSlots() {
+    private int totalSlots() {
         return Math.max(totalSlots, 1);
     }
 }

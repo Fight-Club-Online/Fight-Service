@@ -1,4 +1,4 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Fight;
 
 import Fight_club.Fight_Services.Domain.Repository.FightHistoryRepository;
 import Fight_club.Fight_Services.Domain.models.FightRecord;

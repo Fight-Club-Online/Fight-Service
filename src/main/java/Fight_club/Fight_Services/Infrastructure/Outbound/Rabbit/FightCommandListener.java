@@ -1,6 +1,6 @@
 package Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit;
 
-import Fight_club.Fight_Services.Application.Services.FightCommandRoutingService;
+import Fight_club.Fight_Services.Application.Services.Fight.FightCommandRoutingService;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightCommandMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

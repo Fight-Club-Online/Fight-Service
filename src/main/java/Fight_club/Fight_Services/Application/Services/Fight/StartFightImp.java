@@ -1,7 +1,6 @@
-package Fight_club.Fight_Services.Application.Services;
+package Fight_club.Fight_Services.Application.Services.Fight;
 
 import Fight_club.Fight_Services.Application.Ports.Input.StartFightUseCase;
-import Fight_club.Fight_Services.Application.Ports.Output.FightWsBroker;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import static Fight_club.Fight_Services.Application.Services.LocksStrings.FIGHT_LOCK;
+import static Fight_club.Fight_Services.Application.Services.Fight.LocksStrings.FIGHT_LOCK;
 
 @Service
 @AllArgsConstructor
