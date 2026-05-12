@@ -9,6 +9,7 @@ import Fight_club.Fight_Services.Domain.models.Enums.FighterAction;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightCommandMessage;
 import Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.FightCommandType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import static Fight_club.Fight_Services.Infrastructure.Config.RabbitConfig.fight
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FightCommandRoutingService {
 
     private final FightOwnershipService fightOwnershipService;
@@ -62,6 +64,10 @@ public class FightCommandRoutingService {
     }
 
     public void execute(FightCommandMessage command) {
+        if (command == null || command.getType() == null) {
+            log.warn("Ignoring invalid fight command: {}", command);
+            return;
+        }
         switch (command.getType()) {
             case PLAYER_INPUT -> processCombatInputUseCase.handlePlayerInput(
                     command.getFightId(),
@@ -77,6 +83,7 @@ public class FightCommandRoutingService {
                     command.getCharacterId(),
                     command.getUsername()
             );
+            default -> log.warn("Unsupported fight command type received: {}", command.getType());
         }
     }
 
