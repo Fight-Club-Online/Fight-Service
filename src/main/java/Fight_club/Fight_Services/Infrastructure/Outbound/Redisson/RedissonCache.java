@@ -4,6 +4,7 @@ import Fight_club.Fight_Services.Application.Services.FightOwnershipService;
 import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
 import Fight_club.Fight_Services.Domain.models.Fight;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RSet;
 import org.redisson.api.RedissonClient;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class RedissonCache implements CombatRepository {
 
     private final RedissonClient redisson;
@@ -107,13 +109,20 @@ public class RedissonCache implements CombatRepository {
         if (dirtyOwnedFightIds.isEmpty()) return;
         Set<String> ids = new HashSet<>(dirtyOwnedFightIds);
         for (String fightId : ids) {
-            Fight fight = localOwnedFights.get(fightId);
-            if (fight != null) {
-                writeThroughRemote(fight);
-            } else {
-                removeRemote(fightId);
+            if (!dirtyOwnedFightIds.remove(fightId)) {
+                continue;
             }
-            dirtyOwnedFightIds.remove(fightId);
+            try {
+                Fight fight = localOwnedFights.get(fightId);
+                if (fight != null) {
+                    writeThroughRemote(fight);
+                } else {
+                    removeRemote(fightId);
+                }
+            } catch (Exception ex) {
+                dirtyOwnedFightIds.add(fightId);
+                log.error("Failed to flush snapshot for fight {}", fightId, ex);
+            }
         }
     }
 
