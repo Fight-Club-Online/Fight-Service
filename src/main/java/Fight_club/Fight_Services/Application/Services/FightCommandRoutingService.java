@@ -69,11 +69,18 @@ public class FightCommandRoutingService {
             return;
         }
         switch (command.getType()) {
-            case PLAYER_INPUT -> processCombatInputUseCase.handlePlayerInput(
-                    command.getFightId(),
-                    command.getUserId(),
-                    FighterAction.valueOf(command.getAction())
-            );
+            case PLAYER_INPUT -> {
+                FighterAction parsedAction = parseAction(command.getAction());
+                if (parsedAction == null) {
+                    log.warn("Ignoring PLAYER_INPUT with invalid action '{}', command={}", command.getAction(), command);
+                    return;
+                }
+                processCombatInputUseCase.handlePlayerInput(
+                        command.getFightId(),
+                        command.getUserId(),
+                        parsedAction
+                );
+            }
             case CLAIM_HELP -> claimHelpButtonUseCase.claimHelpButton(command.getFightId(), command.getUserId());
             case ASK_HELP -> askHelpButtonUseCase.askHelpButton(command.getFightId(), command.getUserId());
             case TAKE_BACK -> takeBackControlUseCase.takeBackFigther(command.getFightId(), command.getUserId());
@@ -97,5 +104,16 @@ public class FightCommandRoutingService {
                 fightCommandRoutingKey(fightOwnershipService.slotForFight(fightId)),
                 command
         );
+    }
+
+    private FighterAction parseAction(String action) {
+        if (action == null || action.isBlank()) {
+            return null;
+        }
+        try {
+            return FighterAction.valueOf(action);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }
