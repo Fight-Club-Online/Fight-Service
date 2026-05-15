@@ -44,8 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/fightService")
                 .setAllowedOriginPatterns(
                     "http://localhost:5173",
-                    "https://lamentaciones-frontend-juan-caballeros-projects.vercel.app/",
-                     "*"
+                    "https://lamentaciones-frontend-juan-caballeros-projects.vercel.app"
                 )
                 .withSockJS();
     }
