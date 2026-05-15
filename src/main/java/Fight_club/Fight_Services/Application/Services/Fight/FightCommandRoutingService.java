@@ -94,6 +94,8 @@ public class FightCommandRoutingService {
     }
 
     private void dispatch(String fightId, FightCommandType type, String userId, String action, String characterId, String username) {
+        log.info("Dispatching command: Mio?{},routingKey{}",fightOwnershipService.isOwnedByCurrentNode(fightId),fightCommandRoutingKey(fightOwnershipService.slotForFight(fightId)));
+
         FightCommandMessage command = new FightCommandMessage(type, fightId, userId, action, characterId, username);
         if (fightOwnershipService.isOwnedByCurrentNode(fightId)) {
             execute(command);

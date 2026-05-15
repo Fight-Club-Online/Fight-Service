@@ -1,9 +1,11 @@
 package Fight_club.Fight_Services.Application.Services.Fight;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class FightOwnershipService {
 
     @Value("${fight.partition.total-slots:1}")
@@ -17,6 +19,7 @@ public class FightOwnershipService {
     }
 
     public boolean isOwnedByCurrentNode(String fightId) {
+        log.info("Checking ownership of fight {} in slot {}", fightId, currentSlot());
         return slotForFight(fightId) == currentSlot();
     }
 
