@@ -24,7 +24,7 @@ jobs:
       - name: Log in to container registry
         uses: docker/login-action@v2
         with:
-          registry: https://ghcr.io/
+          registry: ghcr.io/
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_E35D678E0FD24A00AFF50DEC0EAE6E0D }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_E48A287A0FAC49DEAD1D604107A8E2F0 }}
 
@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_E35D678E0FD24A00AFF50DEC0EAE6E0D }}/fight-club-online/fight-service:${{ github.sha }}
+          tags: ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CF1DACB538B941A59A6736429447D476 }}/fight-service:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
