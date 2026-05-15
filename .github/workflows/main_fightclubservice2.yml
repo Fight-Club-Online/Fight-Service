@@ -25,15 +25,15 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_E35D678E0FD24A00AFF50DEC0EAE6E0D }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_E48A287A0FAC49DEAD1D604107A8E2F0 }}
+          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_7D20D1E215D44100B1A5B95FB7CC1BA5 }}
+          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_938686D95936430CA1B9EFD8808E089B }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CF1DACB538B941A59A6736429447D476 }}/fight-service:${{ github.sha }}
+          tags: ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_7D20D1E215D44100B1A5B95FB7CC1BA5 }}/fight-service:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -49,9 +49,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0AF5A88B52534B73A6F9D867399417E6 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_68B6A9C37A4349E9A2915E8A290E989B }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5BA6FD4FBED147608B8ADC31A8BCF101 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0731AAA10CDB4A9C86DC84FA0EFC20AB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_605AA474F50E47A583A41773C2BA3B17 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_562F0F3EDD874BE597F642226D8E3728 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -59,5 +59,5 @@ jobs:
         with:
           app-name: 'FightClubService2'
           slot-name: 'Production'
-          images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_E35D678E0FD24A00AFF50DEC0EAE6E0D }}/fight-club-online/fight-service:${{ github.sha }}'
+          images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_7D20D1E215D44100B1A5B95FB7CC1BA5 }}/fight-service:${{ github.sha }}'
           
