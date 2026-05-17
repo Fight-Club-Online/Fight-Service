@@ -40,16 +40,32 @@ public class FightLoopService {
             }
         }
     }
-
+    
     private boolean applyPhysics(Fighter fighter) {
         if (fighter == null || fighter.isDefeated()) return false;
         
         boolean moved = false;
         FighterAction action = fighter.getCurrentAction();
-
+        
+        if (action == FighterAction.BASIC_ATTACK || action == FighterAction.SPECIAL_ATTACK) {
+            if (fighter.getCurrentStunFrames() <= 0) {
+                fighter.setCurrentStunFrames(10); 
+            } else {
+                fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
+                if (fighter.getCurrentStunFrames() == 0) {
+                    fighter.setCurrentAction(FighterAction.IDLE);
+                }
+            }
+            return true;
+        }
+        
         if (fighter.getCurrentStunFrames() > 0) {
             fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
-            return true; 
+            
+            if (fighter.getCurrentStunFrames() == 0 && fighter.getCurrentAction() == FighterAction.HURT) {
+                fighter.setCurrentAction(FighterAction.IDLE);
+            } 
+            return true;
         }
 
         if (action == FighterAction.MOVE_LEFT) {
@@ -61,7 +77,7 @@ public class FightLoopService {
             fighter.setDirection(Direction.RIGHT);
             moved = true;
         }
-
+        
         if (action == FighterAction.JUMP && fighter.isGrounded()) {
             fighter.setVelocityY(JUMP_SPEED);
             fighter.setGrounded(false);
@@ -80,7 +96,6 @@ public class FightLoopService {
             fighter.setGrounded(true);
             moved = true;
         }
-
         return moved;
     }
 
