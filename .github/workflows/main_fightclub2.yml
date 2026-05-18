@@ -59,5 +59,4 @@ jobs:
         with:
           app-name: 'FightClub2'
           slot-name: 'Production'
-          images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_F86F24C9C97A450181E2D264E83430A7 }}/fight-service:${{ github.sha }}'
-          
+          images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_819DA3F42ECF425489E07F9247A0D678 }}/fight-service:${{ github.sha }}'          
