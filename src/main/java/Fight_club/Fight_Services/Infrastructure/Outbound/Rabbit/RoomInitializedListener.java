@@ -17,8 +17,10 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import static Fight_club.Fight_Services.Infrastructure.Config.RabbitConfig.ROOM_QUEUE;
 import static Fight_club.Fight_Services.Infrastructure.Outbound.Rabbit.Event.Mapper.ToPlayer.toPlayer;
@@ -39,12 +41,12 @@ public class RoomInitializedListener {
 
         long random = ThreadLocalRandom.current().nextLong();
 
-        List<Player> specs = roomInitializedEvent.getPlayers().stream()
+        List<Player> specs = new ArrayList<>(roomInitializedEvent.getPlayers().stream()
                 .filter(p->p.getPlayerType().equals(PlayerType.SPECTATOR))
-                .map(ToPlayer::toPlayer).toList();
-        List<Fighter> figthers = roomInitializedEvent.getPlayers().stream()
+                .map(ToPlayer::toPlayer).toList());
+        List<Fighter> figthers = new ArrayList<>(roomInitializedEvent.getPlayers().stream()
                 .filter(p->p.getPlayerType().equals(PlayerType.PLAYER))
-                .map(ToFigther::toFighter).toList();
+                .map(ToFigther::toFighter).toList());
         log.info("Spectators count: {}", specs.size());
         log.info("Fighters count: {}", figthers.size());
         if(figthers.size() != 2){
