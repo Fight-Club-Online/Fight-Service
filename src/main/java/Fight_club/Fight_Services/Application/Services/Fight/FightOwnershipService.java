@@ -19,7 +19,6 @@ public class FightOwnershipService {
     }
 
     public boolean isOwnedByCurrentNode(String fightId) {
-        log.info("Checking ownership of fight {} in slot {}", fightId, currentSlot());
         return slotForFight(fightId) == currentSlot();
     }
 

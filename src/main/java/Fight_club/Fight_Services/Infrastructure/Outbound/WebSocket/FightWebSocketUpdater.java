@@ -36,6 +36,7 @@ public class FightWebSocketUpdater implements FightWsBroker {
 
     @Override
     public void changeFighters(String fightId, Fight fight) {
+        log.info("boton ${}",fight.getHelpButton());
         messagingTemplate.convertAndSend(
                 "/topic/fight." + fightId + ".fighters",
                 fight);
