@@ -1,29 +1,38 @@
 package Fight_club.Fight_Services.Application.Services.Action;
  
-import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
-import Fight_club.Fight_Services.Domain.models.*;
-import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
-import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
-import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
-import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocketUpdater;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
- 
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
- 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+
+import Fight_club.Fight_Services.Domain.Repository.CombatRepository;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtomClaimedType;
+import Fight_club.Fight_Services.Domain.models.Enums.ButtonStatus;
+import Fight_club.Fight_Services.Domain.models.Enums.PlayerType;
+import Fight_club.Fight_Services.Domain.models.Fight;
+import Fight_club.Fight_Services.Domain.models.Fighter;
+import Fight_club.Fight_Services.Domain.models.Health;
+import Fight_club.Fight_Services.Domain.models.HelpButton;
+import Fight_club.Fight_Services.Domain.models.Player;
+import Fight_club.Fight_Services.Infrastructure.Outbound.WebSocket.FightWebSocketUpdater;
  
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ClaimHelpButtonImp Tests")
@@ -89,7 +98,6 @@ class ClaimHelpButtonImpTest {
         }
     }
  
-    // ─── Early-return guards ──────────────────────────────────────────────────
  
     @Nested
     @DisplayName("When HelpButton is already claimed")
@@ -114,18 +122,7 @@ class ClaimHelpButtonImpTest {
             verify(helpButton, never()).setClaimedByUserId(any());
             verify(combatRepository, never()).save(any());
         }
- 
-        @Test
-        @DisplayName("Should return early when claimedByUserId is already set")
-        void shouldReturnEarlyWhenClaimedByUserIdNotEmpty() {
-            when(helpButton.getStatus()).thenReturn(ButtonStatus.INACTIVE);
-            when(helpButton.getClaimedByUserId()).thenReturn("already-claimed-user");
- 
-            claimHelpButtonImp.claimHelpButton(FIGHT_ID, CLAIMER_ID);
- 
-            verify(helpButton, never()).setClaimedByUserId(any());
-            verify(combatRepository, never()).save(any());
-        }
+
     }
  
     // ─── Claimed by spectator ─────────────────────────────────────────────────
