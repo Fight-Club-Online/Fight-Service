@@ -82,9 +82,9 @@ public class SelectFighterImpl implements SelectFighterUseCase {
             log.info("  - characterDEF (default): 10");
         }
 
-        Health health = new Health(100, 100);
+        Health health = new Health(200, 200);
         fighter.setHealth(health);
-        log.info("Health configurado: 100/100");
+        log.info("Health configurado: 200/200");
 
         List<Skill> skills = new ArrayList<>();
         skills.add(
@@ -94,8 +94,8 @@ public class SelectFighterImpl implements SelectFighterUseCase {
                         60,
                         5,
                         10,
-                        15,
-                        20,
+                        60,
+                        2,
                         5
                 )
         );

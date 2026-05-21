@@ -126,15 +126,15 @@ class SelectFighterImplTest {
     }
 
     @Test
-    @DisplayName("Should set health to 100 for all fighters")
+    @DisplayName("Should set health to 110 for all fighters")
     void testSelectFighterHealth() {
         when(combatRepository.findById("fight-1")).thenReturn(Optional.of(fight));
         when(getUserCharacterService.execute("user-1", "char-1")).thenReturn(Optional.of(userCharacter));
 
         selectFighterImpl.selectFigther("fight-1", "user-1", "char-1", "Player1");
 
-        assert(fighter1.getHealth().getCurrentHealth() == 100);
-        assert(fighter1.getHealth().getMaxHealth() == 100);
+        assert(fighter1.getHealth().getCurrentHealth() == 200);
+        assert(fighter1.getHealth().getMaxHealth() == 200);
     }
 
     @Test
