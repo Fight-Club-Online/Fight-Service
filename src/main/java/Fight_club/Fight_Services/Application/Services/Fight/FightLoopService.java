@@ -52,8 +52,16 @@ public class FightLoopService {
 
         if (fighter.getCurrentStunFrames() > 0) {
             fighter.setCurrentStunFrames(fighter.getCurrentStunFrames() - 1);
-            return true; 
-        }
+            if (fighter.getCurrentStunFrames() == 0) {
+                FighterAction current = fighter.getCurrentAction();
+                if (current == FighterAction.BASIC_ATTACK
+                    || current == FighterAction.SPECIAL_ATTACK
+                    || current == FighterAction.HURT) {
+                        fighter.setCurrentAction(FighterAction.IDLE);
+                    }
+                }
+                return true;
+            }
 
         if (action == FighterAction.MOVE_LEFT) {
             fighter.setPosX(Math.max(0, fighter.getPosX() - MOVE_SPEED));
